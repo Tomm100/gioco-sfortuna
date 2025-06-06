@@ -3,12 +3,11 @@ import { Route, Routes, Navigate} from 'react-router';
 import DefaultLayout from './components/DefaultLayout.jsx';
 import { useState, useEffect } from 'react';
 import API from './API/API.mjs';
-import { LoginForm } from './components/AuthComponents.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import HomePage from './pages/HomePage.jsx';
 import UserPage from './pages/UserPage.jsx';
-import NewGamePage from './pages/NewGamePage.jsx';
 import GamePage from './pages/GamePage.jsx';
+import GameSummary from './pages/GameSummary.jsx';
 
 function App() {
   
@@ -59,9 +58,8 @@ function App() {
              <Route path='/login' element={loggedIn ? <Navigate replace to='/user' /> : <LoginPage handleLogin={handleLogin} />} />
             <Route path='/user' element={loggedIn ? <UserPage user={user} /> : <Navigate replace to='/login' />} />
             
-            <Route path='/user/game' element={loggedIn ?  <NewGamePage></NewGamePage>: <Navigate replace to='/login' />} />
-            
-            <Route path = '/user/game/:gameId/summary' element={loggedIn ? <div>Game Summary</div> : <Navigate replace to='/login' />} />
+                        
+            <Route path = '/user/game/:gameId/summary' element={loggedIn ? <GameSummary></GameSummary> : <Navigate replace to='/login' />} />
 
             <Route path='/user/storico' element={loggedIn ? <div>Storico</div> : <Navigate replace to='/login' />} />
             <Route path='*' element={<div>Page not found</div>}></Route>

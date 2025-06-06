@@ -1,21 +1,18 @@
-// IniziaPartitaButton.jsx
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "react-bootstrap";
-import { useNavigate } from "react-router";
+import NewGameModal from "./NewGameModal.jsx"; 
 
 function IniziaPartitaButton() {
-  const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
 
   return (
+    <>
+      <Button variant="primary" size="lg" onClick={() => setShowModal(true)}>
+        Inizia Partita
+      </Button>
 
-    
-    <Button
-      variant="primary"
-      size="lg"
-      onClick={() => navigate("/user/game")}
-    >
-      Inizia Partita
-    </Button>
+      <NewGameModal show={showModal} onHide={() => setShowModal(false)} />
+    </>
   );
 }
 

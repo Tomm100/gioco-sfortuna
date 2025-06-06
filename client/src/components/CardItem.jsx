@@ -1,7 +1,7 @@
 // src/components/game/CardItem.jsx
 import { Card, Badge, Container, Row } from 'react-bootstrap';
 
-function CardItem(props) {
+function CardItem(props) { // props: { name, image, badluck }
   return (
     <Card 
       className="text-center flex-shrink-0" 

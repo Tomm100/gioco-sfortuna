@@ -6,7 +6,8 @@ function ModalResult(props) {
   return (
     <Modal show={true} centered backdrop="static">
       <Modal.Header>
-        <Modal.Title>{props.correct ? 'Round vinto!' : 'Round perso'}</Modal.Title>
+      
+        <Modal.Title className='text-center w-100'>{props.correct ? '🎉 Round vinto! 🎉' : '😔 Round perso 😔'}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {props.correct ? (

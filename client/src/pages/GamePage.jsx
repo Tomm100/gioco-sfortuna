@@ -26,18 +26,18 @@ function GamePage(){
         const loadInitial = async () => {
             try{
                 const gameStats = await API.getGameStats(gameId);
-                const initialCards = gameStats.initialCards.map((card) => 
+                const playerCards = gameStats.playerCards.map((card) => 
                     new CardModel(card.id, card.name, card.image, card.badluck)
                 ).sort((a, b) => a.badluck - b.badluck);
-                console.log('Initial cards:', initialCards);
                 
                 
                 
-                setCards(initialCards); 
+                
+                setCards(playerCards); 
                 setRoundNum(gameStats.roundNumber); 
                 setWrongGuesses(gameStats.wrongGuesses);
                 
-                if (gameStats.gameStatus === 'lost' || gameStats.gameStatus === 'won') {
+                if (gameStats.status === 'lost' || gameStats.status === 'won') {
                     navigate(`/game/${gameId}/summary`);
                     return;
                 }
@@ -106,7 +106,7 @@ function GamePage(){
 
             // 4) Se ho 6 o più carte, termino la partita
             if (newCards.length >= 6) {
-                navigate(`/game/${gameId}/summary`);
+                navigate(`/user/game/${gameId}/summary`);
                 return;
             }
 
@@ -123,7 +123,7 @@ function GamePage(){
             setRoundNum((prev) => prev + 1);
 
             if (resultData.wrongGuesses >= 3) {
-                navigate(`/game/${gameId}/summary`);
+                navigate(`/user/game/${gameId}/summary`);
                 return;
             }
 

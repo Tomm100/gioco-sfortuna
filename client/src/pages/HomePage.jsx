@@ -102,7 +102,7 @@ function HomePage(props) {
 
 
 function ModeCard (props)  {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const primaryColor = "#6c3cf0";
     return (
     <Card className="shadow-sm h-100 border-0">

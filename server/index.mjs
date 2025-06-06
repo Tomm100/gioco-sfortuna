@@ -183,7 +183,7 @@ app.post('/api/game/:gameId/guess'  , isLoggedIn, [
     }
 
     // Calcolo roundNumber
-    const nextRound = await getRoundNumberForGame(gameId) + 1;
+    const nextRound = await getRoundNumberForGame(gameId);
 
     let won = false;
     if (position === positionCorretto) {
@@ -248,7 +248,7 @@ app.post('/api/game/:gameId/timeout', isLoggedIn, [
       return res.status(404).json({ error: 'Partita non trovata' });
 
     // Calcolo roundNumber
-    const nextRound = await getRoundNumberForGame(gameId) + 1;
+    const nextRound = await getRoundNumberForGame(gameId);
     
     // Aggiungo la carta come sbagliata
     await addGameCard(gameId, cardId, nextRound);
@@ -290,13 +290,13 @@ app.get('/api/game/:gameId', isLoggedIn, async (req, res) => {
       return res.status(404).json({ error: 'Partita non trovata' });
     }
     
-    // Recupero solo le carte conquistate (guessed = 1)
-    const initialCards = await getPlayerCardsForGame(gameId);
+    // Recupero solo le carte conquistate + le iniziali (nome initialCards da cambiare)
+    const playerCard = await getPlayerCardsForGame(gameId);
     const roundNumber = await getRoundNumberForGame(gameId);
     const wrongGuesses = await countWrongGuesses(gameId);
     
     return res.json({
-      initialCards: initialCards,
+      playerCards: playerCard,
       roundNumber: roundNumber,
       wrongGuesses: wrongGuesses,
       gameStatus: game.status
