@@ -3,8 +3,8 @@ import cors from 'cors';
 import morgan from 'morgan';
 import path from 'path';
 import { getAllCards, getInitialCards, getRandomCards, getCardById } from './DAO/CardDAO.mjs';
-import { createGame, getGameById, updateGameStatus } from './DAO/GamesDAO.mjs';
-import { addInitialCards, getUsedCardIdsForGame, addGameCard, getPlayerCardsForGame, updateGameCardGuessed, countPlayerCards, countWrongGuesses, getRoundNumberForGame} from './DAO/RoundDAO.mjs';
+import { createGame, getGameById, updateGameStatus, createDemoGame } from './DAO/GamesDAO.mjs';
+import { addInitialCards, getUsedCardIdsForGame, addGameCard, getPlayerCardsForGame, updateGameCardGuessed, countPlayerCards, countWrongGuesses, getRoundNumberForGame, getUserGamesHistory} from './DAO/RoundDAO.mjs';
 import { getUser } from './DAO/UserDAO.mjs';
 
 import { check, validationResult } from 'express-validator';
@@ -100,8 +100,8 @@ app.get('/api/cards/initial', (req, res) => {
 
 
 /** 1) Creazione nuova partita **/
-// POST /api/games
-app.post('/api/game' , isLoggedIn ,async (req, res) => {
+// POST /api/game
+app.post('/api/user/game' , isLoggedIn ,async (req, res) => {
   try {
     console.log('Richiesta di creazione partita ricevuta');
     
@@ -121,7 +121,7 @@ app.post('/api/game' , isLoggedIn ,async (req, res) => {
 
 /** 2a) Richiedi nuova carta da indovinare **/
 // GET /api/games/:gameId/next
-app.get('/api/game/:gameId/next', isLoggedIn,  async (req, res) => {
+app.get('/api/user/game/:gameId/next', isLoggedIn,  async (req, res) => {
   const gameId = +req.params.gameId;
   try {
     const game = await getGameById(gameId);
@@ -149,7 +149,7 @@ app.get('/api/game/:gameId/next', isLoggedIn,  async (req, res) => {
 
 /** 2b) Il giocatore invia il guess **/
 // POST /api/games/:gameId/guess
-app.post('/api/game/:gameId/guess'  , isLoggedIn, [
+app.post('/api/user/game/:gameId/guess'  , isLoggedIn, [
   check('cardId').isInt(),
   check('position').isInt({ min: 0 })
 ], async (req, res) => {
@@ -205,7 +205,6 @@ app.post('/api/game/:gameId/guess'  , isLoggedIn, [
       return res.json({
         result: 'correct',
         card: theCard,
-        realIndex: positionCorretto,
         numPlayerCards: numWon,
         gameStatus: (numWon >= 6 ? 'won' : 'ongoing')
       });
@@ -220,7 +219,6 @@ app.post('/api/game/:gameId/guess'  , isLoggedIn, [
       
       return res.json({
         result: 'wrong',
-        realIndex: positionCorretto,
         gameStatus: (wrongCount >= 3 ? 'lost' : 'ongoing'),
         wrongGuesses: wrongCount
       });
@@ -232,7 +230,7 @@ app.post('/api/game/:gameId/guess'  , isLoggedIn, [
 });
 
 /** 2c) Timeout del timer **/
-app.post('/api/game/:gameId/timeout', isLoggedIn, [
+app.post('/api/user/game/:gameId/timeout', isLoggedIn, [
   check('cardId').isInt()
 ], async (req, res) => {
   // Controllo validità dei dati
@@ -259,19 +257,10 @@ app.post('/api/game/:gameId/timeout', isLoggedIn, [
       await updateGameStatus(gameId, 'lost');
     }
     
-    // Per il timeout, devo comunque restituire la posizione corretta per il modal
-    const theCard = await getCardById(cardId);
-    const playerCards = await getPlayerCardsForGame(gameId);
     
-    let positionCorretto = 0;
-    while (positionCorretto < playerCards.length &&
-           playerCards[positionCorretto].badluck < theCard.badluck) {
-      positionCorretto++;
-    }
     
     return res.json({
       result: 'wrong',
-      realIndex: positionCorretto,
       gameStatus: (wrongCount >= 3 ? 'lost' : 'ongoing'),
       wrongGuesses: wrongCount
     });
@@ -282,7 +271,7 @@ app.post('/api/game/:gameId/timeout', isLoggedIn, [
 });
 
 /** 3) Recupera lo stato della partita **/
-app.get('/api/game/:gameId', isLoggedIn, async (req, res) => {
+app.get('/api/user/game/:gameId', isLoggedIn, async (req, res) => {
   const gameId = +req.params.gameId;
   try {
     const game = await getGameById(gameId);
@@ -300,6 +289,176 @@ app.get('/api/game/:gameId', isLoggedIn, async (req, res) => {
       roundNumber: roundNumber,
       wrongGuesses: wrongGuesses,
       gameStatus: game.status
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).end();
+  }
+});
+
+
+// 4) Recupera tutte le partite di un utente con cronologia dettagliata 
+app.get('/api/user/games', isLoggedIn, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userGames = await getUserGamesHistory(userId);
+    
+    return res.json(userGames);
+  } catch (e) {
+    console.error('Errore nel recupero cronologia partite:', e);
+    return res.status(500).json({ error: 'Errore interno del server' });
+  }
+});
+
+
+
+// crea una partita demo 
+app.post("/api/demo/game" , async (req, res) => {
+  try {
+    
+    const gameId = await createDemoGame();
+    // Pesco 3 carte iniziali e le aggiungo come "conquistate" (guessed = 1)
+    const initialCards = await getRandomCards(3, []);    
+    await addInitialCards(gameId, initialCards.map(c => c.id));
+    
+    return res.status(201).json({ gameId, initialCards });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: 'Impossibile creare partita' });
+  }
+})
+
+// Richiede carta da indovinare
+app.get('/api/demo/game/:gameId/next',  async (req, res) => {
+  const gameId = +req.params.gameId;
+  try {
+    const game = await getGameById(gameId);
+    if (!game)
+      return res.status(404).json({ error: 'Partita non trovata' });
+    if (game.status !== 'ongoing')
+      return res.status(400).json({ error: 'Partita già conclusa' });
+    
+    // Recupero le carte iniziali per non prendere una nuova carta che è già presente fra queste
+    const usedCards = await getUsedCardIdsForGame(gameId);
+    const nextCard = await getRandomCards(1, usedCards).then(cards => cards[0]);
+    
+    // NON aggiungo la carta al database qui - la aggiungerò solo quando il giocatore fa il guess
+    return res.json({
+      id: nextCard.id,
+      name: nextCard.name,
+      image: nextCard.image,
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).end();
+  }
+});
+
+
+
+// Invia posizione carta da indovinare
+app.post('/api/demo/game/:gameId/guess', [
+  check('cardId').isInt(),
+  check('position').isInt({ min: 0 })
+], async (req, res) => {
+
+  // Controllo validità dei dati
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+
+  const gameId = +req.params.gameId;
+  const { cardId, position } = req.body;
+  try {
+    const game = await getGameById(gameId);
+    
+    if (!game) 
+      return res.status(404).json({ error: 'Partita non trovata' });
+   
+    // Recupera la carta del round
+    const theCard = await getCardById(cardId);
+    
+    if (!theCard) 
+      return res.status(404).json({ error: 'Carta non esistente' });
+
+    // Recupera le carte conquistate dal giocatore (solo quelle con guessed = 1)
+    const playerCards = await getPlayerCardsForGame(gameId);
+    
+    // Calcolo posizione corretta:
+    let positionCorretto = 0;
+    while (positionCorretto < playerCards.length &&
+           playerCards[positionCorretto].badluck < theCard.badluck) {
+      positionCorretto++;
+    }
+
+    
+
+    let won = false;
+    if (position === positionCorretto) {
+      won = true;
+    }
+   
+    // Aggiungo la carta al database con il risultato
+    if (won) {
+      await addGameCard(gameId, cardId, 1);
+      await updateGameCardGuessed(gameId, cardId, 1); // Conquistata
+      
+      
+      await updateGameStatus(gameId, 'won');
+      
+      
+      return res.json({
+        result: 'correct',
+        card: theCard,
+        gameStatus: 'won'
+      });
+    } else {
+      await addGameCard(gameId, cardId, 1);
+      await updateGameCardGuessed(gameId, cardId, 0); // Sbagliata
+      
+      
+      
+      return res.json({
+        result: 'wrong',
+        gameStatus: 'lost',
+        
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    return res.status(500).end();
+  }
+});
+
+
+app.post('/api/demo/game/:gameId/timeout', [
+  check('cardId').isInt()
+], async (req, res) => {
+  // Controllo validità dei dati
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+
+  const gameId = +req.params.gameId;
+  const { cardId } = req.body;
+  
+  try {
+    const game = await getGameById(gameId);
+    if (!game) 
+      return res.status(404).json({ error: 'Partita non trovata' });
+
+    
+   
+    
+    // Aggiungo la carta come sbagliata
+    await addGameCard(gameId, cardId, 1);
+    await updateGameCardGuessed(gameId, cardId, 0);
+    
+    
+    await updateGameStatus(gameId, 'lost');
+    
+    return res.json({
+      result: 'wrong',
+      gameStatus: 'lost',
+      
     });
   } catch (e) {
     console.error(e);

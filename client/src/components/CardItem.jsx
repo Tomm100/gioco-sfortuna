@@ -9,13 +9,13 @@ function CardItem(props) { // props: { name, image, badluck }
         width: '140px', 
         height: '220px'
       }}
-    >
+    >{props.image !== undefined && 
       <Card.Img
         variant="top"
         src={`http://localhost:3001/public/${props.image}`}
         className="w-100"
         style={{ height: '80px', objectFit: 'cover' }}
-      />
+      />}
 
       <Card.Body className="d-flex flex-column justify-content-between p-2">
         <Card.Text className="small">{props.name}</Card.Text>

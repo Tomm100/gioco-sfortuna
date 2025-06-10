@@ -1,6 +1,9 @@
 import React from 'react';
 import { Card, Row, Col } from 'react-bootstrap';
-import CardItem from './CardItem.jsx'; // importa il tuo componente
+import CardItem from './CardItem.jsx'; 
+
+
+// Utilizzato per il riepilogo di una partita appena completata
 
 function CardsSummaryBox(props) { // cards
  

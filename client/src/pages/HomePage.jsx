@@ -20,10 +20,10 @@ function HomePage(props) {
   return (
     <div style={{ backgroundColor: "#f7f8fa" }}>
       {/* HERO ----------------------------------------------------- */}
-      <section className="d-flex flex-column justify-content-center align-items-center pt-5">
+      <section className="d-flex flex-column justify-content-center align-items-center pt-2">
         <Container className="text-center px-4">
           <h1
-            className="fw-bold mb-3"
+            className="fw-bold mb-4"
             style={{ color: primaryColor, fontSize: "3.5rem", lineHeight: 1.1 }}
           >
             Stuff Happens
@@ -82,12 +82,12 @@ function HomePage(props) {
                 ctaLabel="Prova un round demo"
                 onClick={() => navigate("/demo")}
               >
-                <p>Prova un rapido round demo per capire il gioco. Nessun login richiesto – entra e gioca!</p>
+                <p>Prova un rapido round demo per capire il gioco. Nessun login richiesto</p>
                 <ul className="mb-0 ps-3">
                   <li>Parti con 3 carte casuali</li>
                   <li>Un solo round per imparare le meccaniche</li>
                   <li>Nessun account necessario</li>
-                  <li>Perfetto per i nuovi giocatori</li>
+                  
                 </ul>
               </ModeCard>
             </Col>

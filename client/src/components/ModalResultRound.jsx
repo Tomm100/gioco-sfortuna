@@ -1,8 +1,6 @@
-// src/components/game/ModalResult.jsx
-import React from 'react';
 import { Modal, Button } from 'react-bootstrap';
 
-function ModalResult(props) {
+function ModalResultRound(props) {
   return (
     <Modal show={true} centered backdrop="static">
       <Modal.Header>
@@ -25,4 +23,4 @@ function ModalResult(props) {
   );
 }
 
-export default ModalResult;
+export default ModalResultRound;

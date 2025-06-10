@@ -46,7 +46,7 @@ const logOut = async() => {
 }
 
 const createGame = async () => {
-  const response = await fetch(SERVER_URL + '/api/game', {
+  const response = await fetch(SERVER_URL + '/api/user/game', {
     method: 'POST',
     credentials: 'include',
   });
@@ -60,7 +60,7 @@ const createGame = async () => {
 };
 
 const getGameStats = async (gameId) => {
-  const response = await fetch(SERVER_URL + `/api/game/${gameId}`, {
+  const response = await fetch(SERVER_URL + `/api/user/game/${gameId}`, {
     credentials: 'include',
   });
   if (response.ok) {
@@ -74,7 +74,7 @@ const getGameStats = async (gameId) => {
 
 
 const getNextCard = async (gameId) => {
-  const response = await fetch(SERVER_URL + `/api/game/${gameId}/next`, {
+  const response = await fetch(SERVER_URL + `/api/user/game/${gameId}/next`, {
     credentials: 'include',
   });
   if (response.ok) {
@@ -89,7 +89,7 @@ const getNextCard = async (gameId) => {
 
 const guessCard = async (gameId, cardId, posizione) => {
 
-  const response = await fetch(SERVER_URL + `/api/game/${gameId}/guess`, {
+  const response = await fetch(SERVER_URL + `/api/user/game/${gameId}/guess`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ const guessCard = async (gameId, cardId, posizione) => {
 }
 
 const guessCardTimeout = async (gameId, cardId) => {  // <-- Aggiungi cardId come parametro
-  const response = await fetch(SERVER_URL + `/api/game/${gameId}/timeout`, {  // <-- Cambia endpoint
+  const response = await fetch(SERVER_URL + `/api/user/game/${gameId}/timeout`, {  // <-- Cambia endpoint
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -126,5 +126,25 @@ const guessCardTimeout = async (gameId, cardId) => {  // <-- Aggiungi cardId com
   }
 }
 
-const API ={logIn, getUserInfo, logOut, createGame, getGameStats, getNextCard, guessCard, guessCardTimeout};
+const getUserGamesHistory = async () => {
+  const response = await fetch(SERVER_URL + '/api/user/games', {
+    credentials: 'include',
+  });
+  if (response.ok) {
+    const games = await response.json();
+    return games; // [{ gameId, status, createdAt, completedAt, totalCardsCollected, cards: [{ id, name, image, badluck }] }]
+  } else {
+    const errDetails = await response.text();
+    throw errDetails;
+  }
+}
+
+
+
+const createDemoGame = async () =>{
+  
+}
+
+
+const API ={logIn, getUserInfo, logOut, createGame, getGameStats, getNextCard, guessCard, guessCardTimeout, getUserGamesHistory};
 export default API;

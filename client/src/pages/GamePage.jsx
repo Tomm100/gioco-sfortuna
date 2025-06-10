@@ -1,13 +1,15 @@
 import { useParams, useNavigate } from 'react-router';
 import { useState, useEffect } from 'react';
-import { Card, Container, Spinner } from 'react-bootstrap';
+import { Card, Container, Spinner, Alert,Button  } from 'react-bootstrap';
 
 import RoundPrompt from '../components/RoundPrompt.jsx';
-import ModalResult from '../components/ModalResult.jsx';
+import ModalResultRound from '../components/ModalResultRound.jsx';
 
 import API from '../API/API.mjs';
 
 import CardModel from '../models/CardModel.mjs'; 
+
+
 
 function GamePage(){
 
@@ -21,6 +23,11 @@ function GamePage(){
     const [wrongGuesses, setWrongGuesses] = useState(0);
     const [showResult, setShowResult] = useState(false);
     const [resultData, setResultData] = useState(null); // { result: 'correct'/'wrong', realIndex: number, card?: object }
+    const [roundLoading, setRoundLoading] = useState(false);
+    const [error, setError] = useState('');
+   
+   
+
 
     useEffect(() => {
         const loadInitial = async () => {
@@ -47,6 +54,7 @@ function GamePage(){
                 setNextCard(card); 
             } catch (err) {
                 console.error('Errore loading game:', err);
+                setError('Errore durante il caricamento della partita. Riprova più tardi.');
             } finally {
                 setLoading(false);
             }
@@ -75,7 +83,7 @@ function GamePage(){
                 setShowResult(true);
             }
         } catch (err) {
-            console.error('Errore guess o timeout:', err);
+            setError('Errore durante il tentativo. Riprova più tardi.');
         }
     };
 
@@ -112,10 +120,13 @@ function GamePage(){
 
             // 5) Altrimenti chiedo la prossima carta
             try {
+                setRoundLoading(true);
                 const next = await API.getNextCard(gameId);
                 setNextCard(next);
+                setRoundLoading(false);
             } catch (err) {
-                console.error('Errore ottenendo la prossima carta:', err);
+                console.error('Errore nel recupero della prossima carta.', err);
+                setError('Errore nel recupero della prossima carta.');
             }
         } else {
             // risultato "wrong"
@@ -128,31 +139,64 @@ function GamePage(){
             }
 
             try {
+                setRoundLoading(true);
                 const next = await API.getNextCard(gameId);
+                setRoundLoading(false);
                 setNextCard(next);
             } catch (err) {
                 console.error('Errore ottenendo la prossima carta:', err);
+                 setError('Errore nel recupero della prossima carta.');
+                
             }
         }
     };
+    if (loading) {
+    return (
+      <Container className="text-center mt-5">
+        <Spinner animation="border" />
+        <p>Caricamento partita...</p>
+      </Container>
+    );
+  }
+
+
+     if (error) {
+    return (
+      <Container className="mt-5">
+        <Alert variant="danger">{error}</Alert>
+        <div className="text-center mt-3">
+          <Button variant="secondary" onClick={() => navigate('/user')}>
+            Torna al profilo
+          </Button>
+        </div>
+      </Container>
+    );
+  }
 
     return (
         <div>
-            {nextCard && (
-                <RoundPrompt
-                    cards={cards}
-                    nextCard={nextCard}
-                    onGuess={handleGuess}
-                    timeout={30}
-                    roundNum={roundNum}
-                    wrongGuesses={wrongGuesses}
-                    paused={showResult}
-                />
-            )}
+            {roundLoading ? (
+        <div className="text-center mt-5">
+          <Spinner animation="border" />
+          <p>Preparazione prossimo round...</p>
+        </div>
+      ) : (
+        nextCard && (
+          <RoundPrompt
+            cards={cards}
+            nextCard={nextCard}
+            onGuess={handleGuess}
+            timeout={30}
+            roundNum={roundNum}
+            wrongGuesses={wrongGuesses}
+            paused={showResult}
+          />
+        )
+      )}
+            
             {showResult && (
-                <ModalResult
+                <ModalResultRound
                     correct={resultData.result === 'correct'}
-                    realIndex={resultData.realIndex}
                     onClose={onCloseResult}
                 />
             )}
@@ -160,4 +204,12 @@ function GamePage(){
     );
 }
 
+
 export default GamePage;
+
+
+
+
+
+
+

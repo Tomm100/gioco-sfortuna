@@ -157,3 +157,125 @@ export function countWrongGuesses(gameId) {
     });
   });
 }
+
+
+export const getUserGamesHistory = async (userId) => {
+  try {
+    // Query per recuperare tutte le partite completate dell'utente, ordinate per data
+    const gamesQuery = `
+      SELECT 
+        g.id as gameId,
+        g.status,
+        g.startedAt,
+        g.completedAt
+      FROM games g
+      WHERE g.userId = ? 
+        AND g.status IN ('won', 'lost')
+      ORDER BY g.completedAt DESC, g.startedAt DESC
+    `;
+    
+    const games = await new Promise((resolve, reject) => {
+      db.all(gamesQuery, [userId], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+
+    // Per ogni partita, recupero i dettagli delle carte (SOLO NOMI)
+    const gamesWithDetails = await Promise.all(
+      games.map(async (game) => {
+        const gameDetails = await getGameCardsDetailsForHistory(game.gameId);
+        
+        return {
+          gameId: game.gameId,
+          status: game.status,
+          startedAt: game.startedAt,
+          completedAt: game.completedAt,
+          totalCardsCollected: gameDetails.totalCardsCollected,
+          cards: gameDetails.cards
+        };
+      })
+    );
+
+    return gamesWithDetails;
+  } catch (error) {
+    console.error('Errore in getUserGamesHistory:', error);
+    throw error;
+  }
+};
+
+
+const getGameCardsDetailsForHistory = async (gameId) => {
+  try {
+    // Query per recuperare le carte iniziali - SOLO NOME per cronologia
+    const initialCardsQuery = `
+      SELECT 
+        c.id,
+        c.name
+      FROM initialCards ic
+      JOIN cards c ON ic.cardId = c.id
+      WHERE ic.gameId = ?
+      ORDER BY c.badluck ASC
+    `;
+    
+    // Query per recuperare le carte del gioco - SOLO NOME per cronologia
+    const gameCardsQuery = `
+      SELECT 
+        c.id,
+        c.name,
+        gc.roundNumber,
+        gc.guessed
+      FROM gameCards gc
+      JOIN cards c ON gc.cardId = c.id
+      WHERE gc.gameId = ?
+      ORDER BY gc.roundNumber ASC, c.badluck ASC
+    `;
+    
+    const initialCards = await new Promise((resolve, reject) => {
+      db.all(initialCardsQuery, [gameId], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+    
+    const gameCards = await new Promise((resolve, reject) => {
+      db.all(gameCardsQuery, [gameId], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+    
+    // Conto le carte conquistate: tutte le iniziali + quelle del gioco con guessed = 1
+    const totalCardsCollected = initialCards.length + gameCards.filter(card => card.guessed === 1).length;
+    
+    // Organizzo le carte per la cronologia - SOLO NOMI come richiesto dalle specifiche
+    const organizedCards = [
+      // Carte iniziali (sempre conquistate, nessun round associato)
+      ...initialCards.map(card => ({
+        id: card.id,
+        name: card.name,
+        // NON includo image e badluck per rispettare le specifiche
+        roundNumber: null, // Le carte iniziali non hanno round
+        isWon: true, // Le carte iniziali sono sempre conquistate
+        isInitial: true
+      })),
+      // Carte del gioco
+      ...gameCards.map(card => ({
+        id: card.id,
+        name: card.name,
+        // NON includo image e badluck per rispettare le specifiche
+        roundNumber: card.roundNumber,
+        isWon: card.guessed === 1,
+        isInitial: false
+      }))
+    ];
+
+    return {
+      totalCardsCollected,
+      cards: organizedCards
+    };
+  } catch (error) {
+    console.error('Errore in getGameCardsDetailsForHistory:', error);
+    throw error;
+  }
+};

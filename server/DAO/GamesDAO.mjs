@@ -42,6 +42,29 @@ export function updateGameStatus(gameId, status) {
 }
 
 
+export function createDemoGame() {
+  // devo creare una partita demo
+  return new Promise((resolve, reject) => {
+    const sql = 'INSERT INTO games (status) VALUES (?)';
+    db.run(sql, ["ongoing"] , function(err) {
+      if (err) {
+        console.error('Errore durante la creazione della partita:', err);
+        reject(err);
+      } else {
+        resolve(this.lastID); // Restituisce l'ID della nuova partita
+      }
+  })
+}
+);
+
+}
+
+
+
+
+
+
+
 
 
 
