@@ -466,7 +466,28 @@ app.post('/api/demo/game/:gameId/timeout', [
   }
 });
 
-
+app.get('/api/demo/game/:gameId', async (req, res) => {
+  const gameId = +req.params.gameId;
+  try {
+    const game = await getGameById(gameId);
+    if (!game) {
+      return res.status(404).json({ error: 'Partita non trovata' });
+    }
+    
+    // Recupero solo le carte conquistate + le iniziali (nome initialCards da cambiare)
+    const playerCard = await getPlayerCardsForGame(gameId);
+    
+    
+    return res.json({
+      playerCards: playerCard,
+      
+      gameStatus: game.status
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).end();
+  }
+});
 
 
 

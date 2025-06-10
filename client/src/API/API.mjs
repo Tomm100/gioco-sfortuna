@@ -142,9 +142,81 @@ const getUserGamesHistory = async () => {
 
 
 const createDemoGame = async () =>{
-  
+    const response = await fetch(SERVER_URL + '/api/demo/game', {
+    method: 'POST',
+    
+  });
+  if (response.ok) {
+    const game = await response.json();
+    return game;
+  } else {
+    const errDetails = await response.text();
+    throw errDetails;
+  }
+}
+const getNextDemoCard = async (gameId) => {
+  const response = await fetch(SERVER_URL + `/api/demo/game/${gameId}/next`, {
+    
+  });
+  if (response.ok) {
+    const card = await response.json();
+    return card;
+  } else {
+    const errDetails = await response.text();
+    throw errDetails;
+  }
+}
+
+const guessDemoCard = async (gameId, cardId, posizione) => {
+
+  const response = await fetch(SERVER_URL + `/api/demo/game/${gameId}/guess`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cardId, position: posizione }),
+  });
+  if (response.ok) {
+    const result = await response.json();
+    return result; // { result: 'correct' | 'wrong', card: { id, name, img, badluck }, numPlayerCards: number, gameStatus: 'ongoing' | 'won' | 'lost' }
+  } else {
+    const errDetails = await response.text();
+    throw errDetails;
+  }
 }
 
 
-const API ={logIn, getUserInfo, logOut, createGame, getGameStats, getNextCard, guessCard, guessCardTimeout, getUserGamesHistory};
+const guessCardDemoTimeout = async (gameId, cardId) => {  // <-- Aggiungi cardId come parametro
+  const response = await fetch(SERVER_URL + `/api/demo/game/${gameId}/timeout`, {  // <-- Cambia endpoint
+    method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({cardId}), // Ora cardId è definito
+  });
+  if (response.ok) {
+    const result = await response.json();
+    return result; // { result: 'wrong', gameStatus: 'ongoing' | 'lost', wrongGuesses: number }
+  } else {
+    const errDetails = await response.text();
+    throw errDetails;
+  }
+}
+
+
+const getGameDemoStats = async (gameId) => {
+  const response = await fetch(SERVER_URL + `/api/demo/game/${gameId}`, {
+    
+  });
+  if (response.ok) {
+    const stats = await response.json();
+    return stats;
+  } else {
+    const errDetails = await response.text();
+    throw errDetails;
+  }
+};
+
+
+
+const API ={logIn, getUserInfo, logOut, createGame, getGameStats, getNextCard, 
+  guessCard, guessCardTimeout, getUserGamesHistory, createDemoGame, getNextDemoCard,
+  guessCardDemoTimeout, guessDemoCard, getGameDemoStats
+};
 export default API;

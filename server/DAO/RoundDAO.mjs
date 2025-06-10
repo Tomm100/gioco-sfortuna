@@ -166,12 +166,12 @@ export const getUserGamesHistory = async (userId) => {
       SELECT 
         g.id as gameId,
         g.status,
-        g.startedAt,
-        g.completedAt
+        g.startedAt
+        
       FROM games g
       WHERE g.userId = ? 
         AND g.status IN ('won', 'lost')
-      ORDER BY g.completedAt DESC, g.startedAt DESC
+      ORDER BY g.startedAt DESC
     `;
     
     const games = await new Promise((resolve, reject) => {
@@ -190,7 +190,6 @@ export const getUserGamesHistory = async (userId) => {
           gameId: game.gameId,
           status: game.status,
           startedAt: game.startedAt,
-          completedAt: game.completedAt,
           totalCardsCollected: gameDetails.totalCardsCollected,
           cards: gameDetails.cards
         };

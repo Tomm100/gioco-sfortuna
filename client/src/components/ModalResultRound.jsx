@@ -16,7 +16,7 @@ function ModalResultRound(props) {
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={props.onClose} variant="primary">
-          Vai al round successivo
+         Clicca per proseguire
         </Button>
       </Modal.Footer>
     </Modal>
