@@ -71,15 +71,17 @@ function GamePage() {
     setShowResult(false);
 
     if (resultData.result === 'correct') {
-      const realIndex = resultData.realIndex;
-      const newCards = [...cards];
-      newCards.splice(
-        realIndex,
-        0,
-        new CardModel(nextCard.id, nextCard.name, nextCard.image, resultData.card.badluck)
-      );
-      setCards(newCards);
-      setRoundNum((prev) => prev + 1);
+          const realIndex = resultData.realIndex;
+          const newCards = [
+      ...cards,
+      new CardModel(nextCard.id, nextCard.name, nextCard.image, resultData.card.badluck)
+    ];
+
+    // Ordina le carte in base a badluck dopo averne aggiunta una
+    newCards.sort((a, b) => a.badluck - b.badluck);
+
+    setCards(newCards)
+          setRoundNum((prev) => prev + 1);
 
       if (newCards.length >= 6) {
         navigate(`/user/game/${gameId}/summary`);
