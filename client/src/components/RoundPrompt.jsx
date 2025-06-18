@@ -1,94 +1,76 @@
-// src/components/game/RoundPrompt.jsx
 import React, { useEffect, useState } from 'react';
-import {  Row, Col, Container } from 'react-bootstrap';
+import { Row, Col, Container, Stack, Card } from 'react-bootstrap';
 import Timer from './Timer.jsx';
 import CardItem from './CardItem.jsx';
 import GameBoard from './GameBoard.jsx';
-function RoundPrompt(props) { // cards, nextCard, onGuess, timeout = 30
+
+function RoundPrompt(props) {
   const [timeLeft, setTimeLeft] = useState(props.timeout);
 
-
   useEffect(() => {
-    setTimeLeft(props.timeout);   // il timer viene riavviato ogni volta che cambia la carta da indovinare
+    setTimeLeft(props.timeout);
   }, [props.nextCard, props.timeout]);
 
   useEffect(() => {
+    if (props.paused) return;
 
-    if (props.paused){   // se true, blocca il timer (il giocatore ha fatto la scelta ed il model è aperto)
-      return; 
-    }
     const interval = setInterval(() => {
       setTimeLeft((t) => t - 1);
     }, 1000);
 
     if (timeLeft <= 0) {
       clearInterval(interval);
-      props.onGuess(null);       // se scaffa il timer, il giocatore non ha indovinato
+      props.onGuess(null);
     }
 
     return () => clearInterval(interval);
   }, [timeLeft]);
 
   const handleClickPosition = (pos) => {
-    props.onGuess(pos);        // chiama la funzione onGuess passata come prop con la posizione scelta
+    props.onGuess(pos);
   };
 
   return (
-   
-       
+    <Container
+      fluid
+      className="d-flex justify-content-center align-items-start py-5"
+      style={{ minHeight: '100vh' }}
+    >
+      <Card className="p-4 shadow-lg w-100" style={{ maxWidth: '1300px', backgroundColor: '#fdfdfd', borderRadius: '12px' }}>
+        <Row className="gx-4 gy-4 align-items-stretch">
+          {/* Colonna sinistra - GameBoard + info */}
+          <Col lg={8} className="d-flex flex-column">
+            <Card className="p-3 border-0 shadow-sm bg-light h-100">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="fw-semibold">Round: {props.roundNum}</div>
+                <div className="fw-semibold">Sbagliate: {props.wrongGuesses}</div>
+              </div>
+              <h5 className="fw-semibold text-secondary mb-3 text-center">Le tue carte</h5>
+              <div className="px-2" style={{ overflowX: 'auto' }}>
+                <GameBoard cards={props.cards} onGuess={handleClickPosition} />
+              </div>
+            </Card>
+          </Col>
 
-       
-    <Container className="py-4">
-      {/* ---------------------------------------------------
-          CARTA DA INDOVINARE
-          --------------------------------------------------- */}
-      <Row className="justify-content-center mb-3">
-        <Col xs="auto">
-          <h5 className="fw-bold text-primary text-center">
-            Carta da indovinare
-          </h5>
-        </Col>
-      </Row>
-      <Row className="justify-content-center mb-4">
-        <Col xs="auto">
-          <CardItem
-            image={props.nextCard.image}
-            name={props.nextCard.name}
-            badluck={props.nextCard.badluck}
-          />
-        </Col>
-      </Row>
-
-      {/* ---------------------------------------------------
-          TIMER e SCRITTA ROUND/SBAGLIATE (stessa larghezza del box)
-          --------------------------------------------------- */}
-      <Row className="justify-content-center">
-        <Col md={10} lg={8}>
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            {/* 1) Timer a sinistra */}
-            <Timer timeLeft={timeLeft} />
-
-            {/* 2) Testo “Round / Sbagliate” allineato a destra */}
-            <span className="fw-bold">
-              Round: {props.roundNum} &ensp; Sbagliate: {props.wrongGuesses}
-            </span>
-          </div>
-
-          {/* ---------------------------------------------------
-              BOX “LE TUE CARTE” (sotto lo stesso contenitore)
-              --------------------------------------------------- */}
-          <div className="p-3 border rounded shadow-sm bg-light text-center">
-            <h5 className="fw-semibold text-secondary mb-3">Le tue carte</h5>
-            <GameBoard cards={props.cards} onGuess={props.onGuess} />
-          </div>
-        </Col>
-      </Row>
+          {/* Colonna destra - Carta da indovinare con timer sotto */}
+          <Col lg={4} className="d-flex">
+            <Card className="p-4 border-0 shadow bg-white d-flex flex-column align-items-center justify-content-center w-100" style={{ width: '100%' }}>
+              <h4 className="fw-bold text-primary mb-3 text-center">Carta da indovinare</h4>
+              <div style={{ transform: 'scale(1.1)', transition: 'transform 0.2s ease-in-out' }}>
+                <CardItem
+                  image={props.nextCard.image}
+                  name={props.nextCard.name}
+                  badluck={props.nextCard.badluck}
+                />
+              </div>
+              <div className="text-center mt-4">
+                <Timer timeLeft={timeLeft} />
+              </div>
+            </Card>
+          </Col>
+        </Row>
+      </Card>
     </Container>
-       
-        
-
-      
-       
   );
 }
 
