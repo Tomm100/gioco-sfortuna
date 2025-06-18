@@ -1,7 +1,8 @@
-import React from "react";
+import {useState} from "react";
 import { useNavigate } from "react-router";
 import { Container, Button, Stack, Row, Col, Card } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css"; // icone Bootstrap
+import NewDemoGameModal from '../components/NewDemoGameModal.jsx';
 
 /**
  * StartGamePage – hero + sezione modalità di gioco
@@ -13,6 +14,8 @@ import "bootstrap-icons/font/bootstrap-icons.css"; // icone Bootstrap
 function HomePage(props) {
   const navigate = useNavigate();
   const primaryColor = "#6c3cf0"; // viola brand
+  const [showDemoModal, setShowDemoModal] = useState(false);
+
 
   /* ---------------- Helper Card component -------------------- */
   
@@ -80,7 +83,7 @@ function HomePage(props) {
                 title="Demo Round"
                 ctaVariant="outline-secondary"
                 ctaLabel="Prova un round demo"
-                onClick={() => navigate("/demo")}
+                onClick={() => setShowDemoModal(true)}
               >
                 <p>Prova un rapido round demo per capire il gioco. Nessun login richiesto</p>
                 <ul className="mb-0 ps-3">
@@ -94,6 +97,7 @@ function HomePage(props) {
           </Row>
         </Container>
       </section>
+      <NewDemoGameModal show={showDemoModal} onHide={() => setShowDemoModal(false)} />
       
     </div>
   );

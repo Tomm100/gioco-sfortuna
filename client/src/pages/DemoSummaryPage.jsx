@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router';
 import API from '../API/API.mjs';
 import { Container, Row, Col, Badge, Alert, Spinner, Button } from 'react-bootstrap';
 import CardsSummaryBox from '../components/CardsSummaryBox.jsx';
+import NewDemoGameModal from '../components/NewDemoGameModal.jsx';
 
 function DemoSummaryPage() {
   const { gameId } = useParams();
@@ -10,6 +11,7 @@ function DemoSummaryPage() {
   const [gameStats, setGameStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showNewDemoModal, setShowNewDemoModal] = useState(false);
 
   useEffect(() => {
     const fetchDemoGameStats = async () => {
@@ -27,7 +29,7 @@ function DemoSummaryPage() {
   }, [gameId]);
 
   const handleBackToHome = () => navigate('/');
-  const handleStartNewDemo = () => navigate('/demo');
+  const handleStartNewDemo = () => setShowNewDemoModal(true);
   const handleGoToLogin = () => navigate('/login');
 
   if (loading) {
@@ -96,6 +98,12 @@ function DemoSummaryPage() {
           </Button>
         </Col>
       </Row>
+
+      {/* Modale per nuova demo */}
+      <NewDemoGameModal
+        show={showNewDemoModal}
+        onHide={() => setShowNewDemoModal(false)}
+      />
     </Container>
   );
 }

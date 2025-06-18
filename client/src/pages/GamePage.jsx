@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router';
 import { useState, useEffect } from 'react';
-import { Card, Container, Spinner, Alert, Button, Row, Col } from 'react-bootstrap';
+import { Container, Spinner, Alert, Button, Row, Col } from 'react-bootstrap';
 
 import RoundPrompt from '../components/RoundPrompt.jsx';
 import ModalResultRound from '../components/ModalResultRound.jsx';
@@ -21,6 +21,7 @@ function GamePage() {
   const [resultData, setResultData] = useState(null);
   const [roundLoading, setRoundLoading] = useState(false);
   const [error, setError] = useState('');
+  const [roundStarted, setRoundStarted] = useState(false); // 👈 nuovo
 
   useEffect(() => {
     const loadInitial = async () => {
@@ -38,9 +39,6 @@ function GamePage() {
           navigate(`/user/game/${gameId}/summary`);
           return;
         }
-
-        const card = await API.getNextCard(gameId);
-        setNextCard(card);
       } catch (err) {
         console.error('Errore loading game:', err);
         setError('Errore durante il caricamento della partita. Riprova più tardi.');
@@ -51,6 +49,19 @@ function GamePage() {
 
     loadInitial();
   }, [gameId, navigate]);
+
+  const handleStartRound = async () => {
+    try {
+      setRoundLoading(true);
+      const card = await API.getNextCard(gameId);
+      setNextCard(card);
+      setRoundStarted(true);
+      setRoundLoading(false);
+    } catch (err) {
+      setError('Errore nel recupero della carta del round.');
+      setRoundLoading(false);
+    }
+  };
 
   const handleGuess = async (position) => {
     try {
@@ -71,32 +82,20 @@ function GamePage() {
     setShowResult(false);
 
     if (resultData.result === 'correct') {
-          const realIndex = resultData.realIndex;
-          const newCards = [
-      ...cards,
-      new CardModel(nextCard.id, nextCard.name, nextCard.image, resultData.card.badluck)
-    ];
+      const newCards = [
+        ...cards,
+        new CardModel(nextCard.id, nextCard.name, nextCard.image, resultData.card.badluck)
+      ];
 
-    // Ordina le carte in base a badluck dopo averne aggiunta una
-    newCards.sort((a, b) => a.badluck - b.badluck);
-
-    setCards(newCards)
-          setRoundNum((prev) => prev + 1);
+      newCards.sort((a, b) => a.badluck - b.badluck);
+      setCards(newCards);
+      setRoundNum((prev) => prev + 1);
 
       if (newCards.length >= 6) {
         navigate(`/user/game/${gameId}/summary`);
         return;
       }
 
-      try {
-        setRoundLoading(true);
-        const next = await API.getNextCard(gameId);
-        setNextCard(next);
-        setRoundLoading(false);
-      } catch (err) {
-        console.error('Errore nel recupero della prossima carta.', err);
-        setError('Errore nel recupero della prossima carta.');
-      }
     } else {
       setWrongGuesses(resultData.wrongGuesses);
       setRoundNum((prev) => prev + 1);
@@ -105,16 +104,16 @@ function GamePage() {
         navigate(`/user/game/${gameId}/summary`);
         return;
       }
+    }
 
-      try {
-        setRoundLoading(true);
-        const next = await API.getNextCard(gameId);
-        setNextCard(next);
-        setRoundLoading(false);
-      } catch (err) {
-        console.error('Errore ottenendo la prossima carta:', err);
-        setError('Errore nel recupero della prossima carta.');
-      }
+    try {
+      setRoundLoading(true);
+      const next = await API.getNextCard(gameId);
+      setNextCard(next);
+      setRoundLoading(false);
+    } catch (err) {
+      console.error('Errore nel recupero della prossima carta.', err);
+      setError('Errore nel recupero della prossima carta.');
     }
   };
 
@@ -144,23 +143,29 @@ function GamePage() {
 
   return (
     <Container className="mt-4">
-      {roundLoading ? (
+
+      {!roundStarted && (
+  <ModalResultRound firstRoundIntro={true} onClose={handleStartRound} />
+)}
+
+
+      {roundLoading && (
         <div className="text-center">
           <Spinner animation="border" />
-          <p>Preparazione prossimo round...</p>
+          <p>Preparazione round...</p>
         </div>
-      ) : (
-        nextCard && (
-          <RoundPrompt
-            cards={cards}
-            nextCard={nextCard}
-            onGuess={handleGuess}
-            timeout={30}
-            roundNum={roundNum}
-            wrongGuesses={wrongGuesses}
-            paused={showResult}
-          />
-        )
+      )}
+
+      {roundStarted && nextCard && (
+        <RoundPrompt
+          cards={cards}
+          nextCard={nextCard}
+          onGuess={handleGuess}
+          timeout={30}
+          roundNum={roundNum}
+          wrongGuesses={wrongGuesses}
+          paused={showResult}
+        />
       )}
 
       {showResult && (

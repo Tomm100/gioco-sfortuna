@@ -68,19 +68,27 @@ export const getRoundNumberForGame = (gameId) => {
 
 
 export const addGameCard = (gameId, cardId, roundNumber) => {
-
   return new Promise((resolve, reject) => {
-    const sql = 'INSERT INTO gameCards (gameId, cardId, roundNumber) VALUES (?, ?, ?)';
-    db.run(sql, [gameId, cardId, roundNumber], function(err) {  
-      if (err) {
-        console.error('Errore durante l\'aggiunta della carta alla partita:', err);
-        reject(err);
-      } else {
-        resolve(this.lastID); // Restituisce l'ID della nuova riga inserita
-      }
+    const checkSql = 'SELECT 1 FROM gameCards WHERE gameId = ? AND roundNumber = ?';
+    db.get(checkSql, [gameId, roundNumber], (err, row) => {
+      if (err) return reject(err);
+      if (row) return resolve(); // Il round esiste già
+
+      const insertSql = `
+        INSERT INTO gameCards (gameId, cardId, roundNumber, startedAt)
+        VALUES (?, ?, ?, ?)
+      `;
+      const startedAt = new Date().toISOString();
+      db.run(insertSql, [gameId, cardId, roundNumber, startedAt], (err) => {
+        if (err) {
+          console.error('Errore durante inserimento gameCard con timestamp:', err);
+          return reject(err);
+        }
+        resolve();
+      });
     });
   });
-}
+};
 
 export function getPlayerCardsForGame(gameId) {
     // Recupera le carte che il giocatore ha in mano per una partita specifica (iniziali e quelle indovinate)
@@ -278,3 +286,15 @@ const getGameCardsDetailsForHistory = async (gameId) => {
     throw error;
   }
 };
+
+
+
+export function getRoundStartTime(gameId, cardId) {
+  return new Promise((resolve, reject) => {
+    const sql = 'SELECT startedAt FROM gameCards WHERE gameId = ? AND cardId = ?';
+    db.get(sql, [gameId, cardId], (err, row) => {
+      if (err) reject(err);
+      else resolve(row?.startedAt ? new Date(row.startedAt) : null);
+    });
+  });
+}

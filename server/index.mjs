@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import path from 'path';
 import { getAllCards, getInitialCards, getRandomCards, getCardById } from './DAO/CardDAO.mjs';
 import { createGame, getGameById, updateGameStatus, createDemoGame } from './DAO/GamesDAO.mjs';
-import { addInitialCards, getUsedCardIdsForGame, addGameCard, getPlayerCardsForGame, updateGameCardGuessed, countPlayerCards, countWrongGuesses, getRoundNumberForGame, getUserGamesHistory} from './DAO/RoundDAO.mjs';
+import { addInitialCards, getUsedCardIdsForGame, addGameCard, getPlayerCardsForGame, updateGameCardGuessed, countPlayerCards, countWrongGuesses, getRoundNumberForGame, getUserGamesHistory, getRoundStartTime} from './DAO/RoundDAO.mjs';
 import { getUser } from './DAO/UserDAO.mjs';
 
 import { check, validationResult } from 'express-validator';
@@ -133,8 +133,9 @@ app.get('/api/user/game/:gameId/next', isLoggedIn,  async (req, res) => {
     // Prendo tutte le carte già usate (sia conquistate che sbagliate)
     const usedCards = await getUsedCardIdsForGame(gameId);
     const nextCard = await getRandomCards(1, usedCards).then(cards => cards[0]);
+     const roundNumber = await getRoundNumberForGame(gameId);
+    await addGameCard(gameId, nextCard.id, roundNumber);
     
-    // NON aggiungo la carta al database qui - la aggiungerò solo quando il giocatore fa il guess
     return res.json({
       id: nextCard.id,
       name: nextCard.name,
@@ -160,6 +161,27 @@ app.post('/api/user/game/:gameId/guess'  , isLoggedIn, [
 
   const gameId = +req.params.gameId;
   const { cardId, position } = req.body;
+
+  const startTime = await getRoundStartTime(gameId, cardId);
+
+    if (!startTime) {
+      return res.status(404).json({ error: 'Round non trovato per questa carta' });
+    }
+
+    const now = new Date();
+    const elapsedSeconds = (now - startTime) / 1000;
+
+    if (elapsedSeconds > 30) {
+      await updateGameCardGuessed(gameId, cardId, 0);
+      const wrongCount = await countWrongGuesses(gameId);
+      if (wrongCount >= 3) await updateGameStatus(gameId, 'lost');
+
+      return res.json({
+        result: 'lost',
+        gameStatus: (wrongCount >= 3 ? 'lost' : 'ongoing'),
+        wrongGuesses: wrongCount,
+      });
+    }
   try {
     const game = await getGameById(gameId);
     
@@ -172,6 +194,7 @@ app.post('/api/user/game/:gameId/guess'  , isLoggedIn, [
     if (!theCard) 
       return res.status(404).json({ error: 'Carta non esistente' });
 
+    
     // Recupera le carte conquistate dal giocatore (solo quelle con guessed = 1)
     const playerCards = await getPlayerCardsForGame(gameId);
     
@@ -192,7 +215,7 @@ app.post('/api/user/game/:gameId/guess'  , isLoggedIn, [
    
     // Aggiungo la carta al database con il risultato
     if (won) {
-      await addGameCard(gameId, cardId, nextRound);
+      
       await updateGameCardGuessed(gameId, cardId, 1); // Conquistata
       
       const numWon = await countPlayerCards(gameId);
@@ -209,7 +232,7 @@ app.post('/api/user/game/:gameId/guess'  , isLoggedIn, [
         gameStatus: (numWon >= 6 ? 'won' : 'ongoing')
       });
     } else {
-      await addGameCard(gameId, cardId, nextRound);
+      
       await updateGameCardGuessed(gameId, cardId, 0); // Sbagliata
       
       const wrongCount = await countWrongGuesses(gameId);
@@ -245,11 +268,23 @@ app.post('/api/user/game/:gameId/timeout', isLoggedIn, [
     if (!game || game.userId !== req.user.id) 
       return res.status(404).json({ error: 'Partita non trovata' });
 
+    const startTime = await getRoundStartTime(gameId, cardId);
+    if (!startTime)
+      return res.status(404).json({ error: 'Round non trovato' });
+
+    const now = new Date();
+    const elapsedSeconds = (now - new Date(startTime)) / 1000;
+
+    if (elapsedSeconds < 30) {
+      return res.status(400).json({ error: 'Il tempo non è ancora scaduto.' });
+    }
+    
+    
     // Calcolo roundNumber
     const nextRound = await getRoundNumberForGame(gameId);
     
     // Aggiungo la carta come sbagliata
-    await addGameCard(gameId, cardId, nextRound);
+    
     await updateGameCardGuessed(gameId, cardId, 0);
     
     const wrongCount = await countWrongGuesses(gameId);
@@ -329,7 +364,8 @@ app.post("/api/demo/game" , async (req, res) => {
 })
 
 // Richiede carta da indovinare
-app.get('/api/demo/game/:gameId/next',  async (req, res) => {
+
+app.get('/api/demo/game/:gameId/next', async (req, res) => {
   const gameId = +req.params.gameId;
   try {
     const game = await getGameById(gameId);
@@ -337,12 +373,13 @@ app.get('/api/demo/game/:gameId/next',  async (req, res) => {
       return res.status(404).json({ error: 'Partita non trovata' });
     if (game.status !== 'ongoing')
       return res.status(400).json({ error: 'Partita già conclusa' });
-    
-    // Recupero le carte iniziali per non prendere una nuova carta che è già presente fra queste
+
     const usedCards = await getUsedCardIdsForGame(gameId);
     const nextCard = await getRandomCards(1, usedCards).then(cards => cards[0]);
-    
-    // NON aggiungo la carta al database qui - la aggiungerò solo quando il giocatore fa il guess
+
+    const roundNumber = await getRoundNumberForGame(gameId);
+    await addGameCard(gameId, nextCard.id, roundNumber); // salva anche il timestamp
+
     return res.json({
       id: nextCard.id,
       name: nextCard.name,
@@ -356,73 +393,59 @@ app.get('/api/demo/game/:gameId/next',  async (req, res) => {
 
 
 
+
 // Invia posizione carta da indovinare
 app.post('/api/demo/game/:gameId/guess', [
   check('cardId').isInt(),
   check('position').isInt({ min: 0 })
 ], async (req, res) => {
-
-  // Controllo validità dei dati
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
   const gameId = +req.params.gameId;
   const { cardId, position } = req.body;
+
   try {
     const game = await getGameById(gameId);
-    
-    if (!game) 
-      return res.status(404).json({ error: 'Partita non trovata' });
-   
-    // Recupera la carta del round
-    const theCard = await getCardById(cardId);
-    
-    if (!theCard) 
-      return res.status(404).json({ error: 'Carta non esistente' });
+    if (!game) return res.status(404).json({ error: 'Partita non trovata' });
 
-    // Recupera le carte conquistate dal giocatore (solo quelle con guessed = 1)
+    const startTime = await getRoundStartTime(gameId, cardId);
+    if (!startTime)
+      return res.status(404).json({ error: 'Round non trovato per questa carta' });
+
+    const now = new Date();
+    const elapsedSeconds = (now - new Date(startTime)) / 1000;
+
+    if (elapsedSeconds > 30) {
+      await updateGameCardGuessed(gameId, cardId, 0);
+      await updateGameStatus(gameId, 'lost');
+      return res.json({
+        result: 'lost',
+        gameStatus: 'lost'
+      });
+    }
+
+    const theCard = await getCardById(cardId);
+    if (!theCard) return res.status(404).json({ error: 'Carta non trovata' });
+
     const playerCards = await getPlayerCardsForGame(gameId);
-    
-    // Calcolo posizione corretta:
+
     let positionCorretto = 0;
     while (positionCorretto < playerCards.length &&
            playerCards[positionCorretto].badluck < theCard.badluck) {
       positionCorretto++;
     }
 
-    
+    const correct = position === positionCorretto;
 
-    let won = false;
-    if (position === positionCorretto) {
-      won = true;
-    }
-   
-    // Aggiungo la carta al database con il risultato
-    if (won) {
-      await addGameCard(gameId, cardId, 1);
-      await updateGameCardGuessed(gameId, cardId, 1); // Conquistata
-      
-      
-      await updateGameStatus(gameId, 'won');
-      
-      
-      return res.json({
-        result: 'correct',
-        card: theCard,
-        gameStatus: 'won'
-      });
-    } else {
-      await addGameCard(gameId, cardId, 1);
-      await updateGameCardGuessed(gameId, cardId, 0); // Sbagliata
-      
-      
-      
-      return res.json({
-        result: 'wrong',
-        gameStatus: 'lost',
-        
-      });
-    }
+    await updateGameCardGuessed(gameId, cardId, correct ? 1 : 0);
+    await updateGameStatus(gameId, correct ? 'won' : 'lost');
+
+    return res.json({
+      result: correct ? 'correct' : 'wrong',
+      card: theCard,
+      gameStatus: correct ? 'won' : 'lost'
+    });
   } catch (e) {
     console.error(e);
     return res.status(500).end();
@@ -430,35 +453,37 @@ app.post('/api/demo/game/:gameId/guess', [
 });
 
 
+
 app.post('/api/demo/game/:gameId/timeout', [
   check('cardId').isInt()
 ], async (req, res) => {
-  // Controllo validità dei dati
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
   const gameId = +req.params.gameId;
   const { cardId } = req.body;
-  
+
   try {
     const game = await getGameById(gameId);
-    if (!game) 
-      return res.status(404).json({ error: 'Partita non trovata' });
+    if (!game) return res.status(404).json({ error: 'Partita non trovata' });
 
-    
-   
-    
-    // Aggiungo la carta come sbagliata
-    await addGameCard(gameId, cardId, 1);
+    const startTime = await getRoundStartTime(gameId, cardId);
+    if (!startTime)
+      return res.status(404).json({ error: 'Round non trovato' });
+
+    const now = new Date();
+    const elapsedSeconds = (now - new Date(startTime)) / 1000;
+
+    if (elapsedSeconds < 30) {
+      return res.status(400).json({ error: 'Il tempo non è ancora scaduto.' });
+    }
+
     await updateGameCardGuessed(gameId, cardId, 0);
-    
-    
     await updateGameStatus(gameId, 'lost');
-    
+
     return res.json({
       result: 'wrong',
-      gameStatus: 'lost',
-      
+      gameStatus: 'lost'
     });
   } catch (e) {
     console.error(e);

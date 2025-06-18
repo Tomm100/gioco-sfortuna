@@ -56,7 +56,7 @@ function App() {
             
             <Route  path='/'element= {!loggedIn ? <HomePage ></HomePage> : <Navigate replace to="/user"></Navigate>}></Route>
             <Route path='/regole' element={<RegolePage></RegolePage>}></Route>
-            <Route path='/demo' element={<DemoGamePage></DemoGamePage>}></Route>
+            <Route path='/demo/game/:gameId' element={<DemoGamePage></DemoGamePage>}></Route>
             <Route path = '/demo/game/:gameId/summary' element={<DemoSummaryPage></DemoSummaryPage> } />
 
              <Route path='/login' element={loggedIn ? <Navigate replace to='/user' /> : <LoginPage handleLogin={handleLogin} />} />
