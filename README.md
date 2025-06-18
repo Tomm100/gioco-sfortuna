@@ -23,9 +23,38 @@
 
 ## Database Tables
 
-- Table `users` - contains xx yy zz
-- Table `something` - contains ww qq ss
-- ...
+- **`users`** - Contiene le credenziali degli utenti registrati:
+  - `id` – Chiave primaria
+  - `name` – Nome completo dell'utente
+  - `email` – Email/username per il login
+  - `password` – Password in formato hashato
+  - `salt` – Valore salt per hashing sicuro
+
+- **`cards`** - Contieene tutte le carte disponibili nel gioco:
+  - `id` – Chiave primaria
+  - `name` – Descrizione della situazione sfortunata
+  - `img` – Nome del file immagine associato
+  - `badluck` – Valore numerico dell’indice di sfortuna (da 1.0 a 100.0)
+
+- **`games`** – Contiene tutte le partite giocate dagli utenti:
+  - `id` – Chiave primaria
+  - `userId` – Riferimento all’utente
+  - `startedAt` – Data e ora di inizio della partita
+  - `status` – stato della partita (`ongoing`, `won`, `lost`)
+
+- **`initialCards`** – Contiene le 3 carte iniziali di ogni partita:
+  - `id` – Chiave primaria
+  - `gameId` – Riferimento alla partita
+  - `cardId` – Riferimento alla carta iniziale
+
+- **`gameCards`** – Contiene per ogni partita le carte di ciascun round:
+  - `id` – Chiave primaria
+  - `gameId` – Riferimento alla partita
+  - `cardId` – Carta mostrata nel round
+  - `roundNumber` – Numero del round
+  - `guessed` – Flag (0/1) per indicare se la carta è stata indovinata o meno
+  - `startedAt` – Timestamp di inizio del round
+
 
 ## Main React Components
 
