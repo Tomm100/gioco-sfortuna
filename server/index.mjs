@@ -144,7 +144,8 @@ app.post('/api/user/game/:gameId/guess'  , isLoggedIn, [
     const now = new Date();
     const elapsedSeconds = (now - startTime) / 1000;
 
-    if (elapsedSeconds > 30) {
+    // tolleranza di 3s per eventuali ritardi
+    if (elapsedSeconds > 33) {
       await updateGameCardGuessed(gameId, cardId, 0);
       const wrongCount = await countWrongGuesses(gameId);
       if (wrongCount >= 3) await updateGameStatus(gameId, 'lost');
@@ -388,7 +389,8 @@ app.post('/api/demo/game/:gameId/guess', [
     const now = new Date();
     const elapsedSeconds = (now - new Date(startTime)) / 1000;
 
-    if (elapsedSeconds > 30) {
+    // tolleranza di 3s per eventuali ritardi
+    if (elapsedSeconds > 33) {
       await updateGameCardGuessed(gameId, cardId, 0);
       await updateGameStatus(gameId, 'lost');
       return res.json({
