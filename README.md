@@ -1,6 +1,6 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/uNTgnFHD)
-# Exam #N: "Exam Title"
-## Student: s123456 LASTNAME FIRSTNAME 
+# Exam #1: "Gioco della Sfortuna"
+## Student: s338411 CENTONZE TOMMASO 
 
 ## React Client Application Routes
 
@@ -397,7 +397,7 @@
 - **`users`** - Contiene le credenziali degli utenti registrati:
   - `id` – Chiave primaria
   - `name` – Nome completo dell'utente
-  - `email` – Email/username per il login
+  - `email` – Email per il login
   - `password` – Password in formato hashato
   - `salt` – Valore salt per hashing sicuro
 
@@ -429,17 +429,46 @@
 
 ## Main React Components
 
-- `ListOfSomething` (in `List.js`): component purpose and main functionality
-- `GreatButton` (in `GreatButton.js`): component purpose and main functionality
-- ...
+- `LoginForm` (in `AuthComponents.jsx`): Gestisce l'autenticazione dell'utente con validazione del form e stato di caricamento.
 
-(only _main_ components, minor ones may be skipped)
+- `CardItem` (in `CardItem.jsx`): visualizza una singola carta con immagine, nome e indice di sfortuna in un layout compatto.
+
+- `GameBoard` (in `GameBoard.jsx`): Rappresenta l’interfaccia di gioco con le carte e i pulsanti per selezionare la posizione.
+
+- `RoundPrompt` (in `RoundPrompt.jsx`): Componente principale per un singolo round, gestisce timer, visualizzazione della carta e interazione utente.
+
+- `Timer` (in `Timer.jsx`): Mostra il conto alla rovescia per ogni round.
+
+- `CardsSummaryBox` (in `CardsSummaryBox.jsx`): Mostra una griglia delle carte conquistate alla fine di una partita completata.
+
+- `NewGameModal` (in `NewGameModal.jsx`): Finestra per avviare una nuova partita per utenti autenticati.
+
+- `NewDemoGameModal` (in `NewDemoGameModal.jsx`): Finestra per iniziare una partita demo per utenti non loggati.
+
+- `ModalResultRound` (in `ModalResultRound.jsx`): Mostra i risultati del round appena completato oppure il messaggi introduttivo se si tratta del primo round.
+
+- `NavHeader` (in `NavHeader.jsx`): Barra di navigazione principale con funzionalità di login/logout e gestione delle route.
+
+- `DefaultLayout` (in `DefaultLayout.jsx`): Layout di base che fornisce una struttura coerente tra le varie pagine.
+
 
 ## Screenshot
 
-![Screenshot](./img/screenshot.jpg)
+**Screenshot durante una partita**
+
+![Screenshot](./img/game.png)
+
+**Screenshot cronologia**
+
+![Screenshot](./img/cronologia.png)
+
 
 ## Users Credentials
 
-- username, password (plus any other requested info)
-- username, password (plus any other requested info)
+User 1:
+  - username: tommaso@example.com
+  - password: password  
+
+User 2:  
+  - username: bob@example.com
+  - password: password 
