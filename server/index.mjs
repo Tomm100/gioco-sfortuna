@@ -8,7 +8,7 @@ import { addInitialCards, getUsedCardIdsForGame, addGameCard, getPlayerCardsForG
 import { getUser } from './DAO/UserDAO.mjs';
 
 import { check, validationResult } from 'express-validator';
-import e from 'express';
+
 // per l'autenticazione
 
 import passport from 'passport';
@@ -177,7 +177,7 @@ app.post('/api/user/game/:gameId/guess'  , isLoggedIn, [
       if (wrongCount >= 3) await updateGameStatus(gameId, 'lost');
 
       return res.json({
-        result: 'lost',
+        result: 'wrong',
         gameStatus: (wrongCount >= 3 ? 'lost' : 'ongoing'),
         wrongGuesses: wrongCount,
       });

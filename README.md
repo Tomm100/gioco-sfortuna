@@ -42,16 +42,355 @@
 
 ## API Server
 
-- POST `/api/something`
-  - request parameters and request body content
-  - response body content
-- GET `/api/something`
-  - request parameters
-  - response body content
-- POST `/api/something`
-  - request parameters and request body content
-  - response body content
-- ...
+### **API di Autenticazione**
+
+#### **Login**
+- **URL**: `/api/sessions`
+- **Metodo HTTP**: POST
+- **Descrizione**: Autentica un utente e crea una sessione.
+- **Corpo della richiesta**:
+```json
+{
+  "username": "user@example.com",
+  "password": "password123"
+}
+```
+- **Risposta**: `201 Created` (successo) o `401 Unauthorized` (credenziali non valide).
+- **Corpo della risposta**:
+```json
+{
+  "id": 1,
+  "username": "user@example.com"
+}
+```
+
+#### **Ottieni utente corrente**
+- **URL**: `/api/sessions/current`
+- **Metodo HTTP**: GET
+- **Descrizione**: Recupera le informazioni dell'utente attualmente autenticato.
+- **Risposta**: `200 OK` (successo) o `401 Unauthorized` (non autenticato).
+- **Corpo della risposta**:
+```json
+{
+  "id": 1,
+  "username": "user@example.com"
+}
+```
+
+#### **Logout**
+- **URL**: `/api/sessions/current`
+- **Metodo HTTP**: DELETE
+- **Descrizione**: Termina la sessione dell'utente corrente.
+- **Risposta**: `200 OK` (successo).
+- **Corpo della risposta**: *Nessuno*
+
+### **API Partite Utente** *(Richiede Autenticazione)*
+
+#### **Crea una nuova partita**
+- **URL**: `/api/user/game`
+- **Metodo HTTP**: POST
+- **Descrizione**: Crea una nuova partita per l'utente autenticato con 3 carte iniziali.
+- **Risposta**: `201 Created` (successo), `401 Unauthorized` (non autenticato) o `500 Internal Server Error` (errore generico).
+- **Corpo della risposta**:
+```json
+{
+  "gameId": 123,
+  "initialCards": [
+    {
+      "id": 1,
+      "name": "Nome Carta",
+      "image": "card_image.jpg",
+      "badluck": 30
+    },
+    ...
+  ]
+}
+```
+
+#### **Ottieni prossima carta da indovinare**
+- **URL**: `/api/user/game/<gameId>/next`
+- **Metodo HTTP**: GET
+- **Descrizione**: Ottieni la prossima carta da indovinare per la partita specificata.
+- **Risposta**: `200 OK` (successo), `404 Not Found` (partita non trovata), `400 Bad Request` (partita già conclusa), o `401 Unauthorized` (non autenticato).
+- **Corpo della risposta**:
+```json
+{
+  "id": 5,
+  "name": "Nuova Carta",
+  "image": "new_card.jpg"
+}
+```
+
+#### **Invia posizione da indovinare**
+- **URL**: `/api/user/game/<gameId>/guess`
+- **Metodo HTTP**: POST
+- **Descrizione**: Invia una proposta di posizione per una carta nella partita specificata
+- **Corpo della richiesta**:
+```json
+{
+  "cardId": 5,
+  "position": 2
+}
+```
+- **Risposta**: `200 OK` (successo), `404 Not Found` (partita/carta non trovata), `422 Unprocessable Entity` (errore di validazione), o `401 Unauthorized` (non autenticato).
+- **Corpo della risposta**:
+```json
+{
+  "result": "correct",
+  "card": {
+    "id": 5,
+    "name": "Nome Carta",
+    "image": "card_image.jpg",
+    "badluck": 45
+  },
+  "numPlayerCards": 4,
+  "gameStatus": "ongoing"
+}
+```
+*oppure per tentativo sbagliato:*
+```json
+{
+  "result": "wrong",
+  "gameStatus": "ongoing",
+  "wrongGuesses": 1
+}
+```
+
+#### **Gestisci timeout**
+- **URL**: `/api/user/game/<gameId>/timeout`
+- **Metodo HTTP**: POST
+- **Descrizione**: Gestisce il timeout per una carta, quando il giocatore non effettua una scelta entro 30 secondi.
+- **Corpo della richiesta**:
+```json
+{
+  "cardId": 5
+}
+```
+- **Risposta**: `200 OK` (successo), `404 Not Found` (partita/round non trovato), `400 Bad Request` (tempo non scaduto), o `401 Unauthorized` (non autenticato).
+- **Corpo della risposta**:
+```json
+{
+  "result": "wrong",
+  "gameStatus": "ongoing",
+  "wrongGuesses": 2
+}
+```
+#### **Ottieni lo stato di una partita**
+- **URL**: `/api/user/game/<gameId>`
+- **Metodo HTTP**: GET
+- **Descrizione**: Recupera lo stato attuale di una partita specifica.
+- **Risposta**: `200 OK` (successo), `404 Not Found` (partita non trovata), o `401 Unauthorized` (non autenticato).
+- **Corpo della risposta**:
+```json
+{
+  "playerCards": [
+    {
+      "id": 1,
+      "name": "Nome Carta",
+      "image": "card_image.jpg",
+      "badluck": 30
+    },
+    ...
+  ],
+  "roundNumber": 5,
+  "wrongGuesses": 1,
+  "gameStatus": "ongoing"
+}
+```
+
+#### **Ottieni cronologia partite utente**
+- **URL**: `/api/user/games`
+- **Metodo HTTP**: GET
+- **Descrizione**: Recupera tutte le partite completate dell'utente autenticato con cronologia dettagliata.
+- **Risposta**: `200 OK` (successo), `401 Unauthorized` (non autenticato), o `500 Internal Server Error` (errore generico).
+- **Corpo della risposta**:
+```json
+[
+  {
+    "gameId": 123,
+    "status": "won",
+    "startedAt": "2025-06-19T10:30:00Z",
+    "totalCardsCollected": 6,
+    "cards": [
+      {
+        "id": 1,
+        "name": "Nome Carta",
+        "roundNumber": null,
+        "isWon": true,
+        "isInitial": true
+      },
+      {
+        "id": 3,
+        "name": "Altra Carta",
+        "roundNumber": null,
+        "isWon": true,
+        "isInitial": true
+      },
+      {
+        "id": 7,
+        "name": "Terza Carta",
+        "roundNumber": null,
+        "isWon": true,
+        "isInitial": true
+      },
+      {
+        "id": 5,
+        "name": "Carta Round 1",
+        "roundNumber": 1,
+        "isWon": true,
+        "isInitial": false
+      },
+      {
+        "id": 8,
+        "name": "Carta Round 2",
+        "roundNumber": 2,
+        "isWon": false,
+        "isInitial": false
+      }
+    ]
+  }
+]
+```
+
+### **API Partite Demo** *(Nessuna Autenticazione Richiesta)*
+
+#### **Crea partita demo**
+- **URL**: `/api/demo/game`
+- **Metodo HTTP**: POST
+- **Descrizione**: Crea una nuova partita demo (singolo round) con 3 carte iniziali selezionate casualmente dal server.
+- **Risposta**: `201 Created` (successo) o `500 Internal Server Error` (errore generico).
+- **Corpo della risposta**:
+```json
+{
+  "gameId": 456,
+  "initialCards": [
+    {
+      "id": 1,
+      "name": "Nome Carta",
+      "image": "card_image.jpg",
+      "badluck": 30
+    },
+    {
+      "id": 4,
+      "name": "Carta Demo",
+      "image": "demo_card.jpg",
+      "badluck": 55
+    },
+    {
+      "id": 9,
+      "name": "Ultima Carta",
+      "image": "last_card.jpg",
+      "badluck": 75
+    }
+  ]
+}
+```
+
+#### **Ottieni prossima carta demo**
+- **URL**: `/api/demo/game/<gameId>/next`
+- **Metodo HTTP**: GET
+- **Descrizione**: Ottiene la prossima carta da indovinare nella partita demo. Il server seleziona automaticamente una carta casuale non utilizzata.
+- **Risposta**: `200 OK` (successo), `404 Not Found` (partita non trovata), o `400 Bad Request` (partita già conclusa).
+- **Corpo della risposta**:
+```json
+{
+  "id": 5,
+  "name": "Carta Demo",
+  "image": "demo_card.jpg"
+}
+```
+#### **Invia tentativo demo**
+- **URL**: `/api/demo/game/<gameId>/guess`
+- **Metodo HTTP**: POST
+- **Descrizione**: Invia un tentativo di posizionamento per una carta nella partita demo.
+- **Corpo della richiesta**:
+```json
+{
+  "cardId": 5,
+  "position": 1
+}
+```
+- **Risposta**: `200 OK` (successo), `404 Not Found` (partita/carta non trovata), o `422 Unprocessable Entity` (errore di validazione).
+- **Corpo della risposta** (tentativo corretto - partita vinta):
+```json
+{
+  "result": "correct",
+  "card": {
+    "id": 5,
+    "name": "Nome Carta",
+    "image": "card_image.jpg",
+    "badluck": 25
+  },
+  "gameStatus": "won"
+}
+```
+- **Corpo della risposta** (tentativo sbagliato - partita persa):
+```json
+{
+  "result": "wrong",
+  "gameStatus": "lost"
+}
+```
+
+#### **Gestisci timeout demo**
+- **URL**: `/api/demo/game/<gameId>/timeout`
+- **Metodo HTTP**: POST
+- **Descrizione**: Gestisce il timeout per un tentativo di carta nella partita demo.
+- **Corpo della richiesta**:
+```json
+{
+  "cardId": 5
+}
+```
+- **Risposta**: `200 OK` (successo), `404 Not Found` (partita/round non trovato), o `400 Bad Request` (tempo non scaduto).
+- **Corpo della risposta**:
+```json
+{
+  "result": "wrong",
+  "gameStatus": "lost"
+}
+```
+
+#### **Ottieni stato partita demo**
+- **URL**: `/api/demo/game/<gameId>`
+- **Metodo HTTP**: GET
+- **Descrizione**: Recupera lo stato attuale di una partita demo.
+- **Risposta**: `200 OK` (successo) o `404 Not Found` (partita non trovata).
+- **Corpo della risposta**:
+```json
+{
+  "playerCards": [
+    {
+      "id": 1,
+      "name": "Nome Carta",
+      "image": "card_image.jpg",
+      "badluck": 30
+    },
+    {
+      "id": 4,
+      "name": "Carta Demo",
+      "image": "demo_card.jpg",
+      "badluck": 55
+    },
+    {
+      "id": 9,
+      "name": "Ultima Carta", 
+      "image": "last_card.jpg",
+      "badluck": 75
+    }
+  ],
+  "gameStatus": "ongoing"
+}
+```
+
+
+
+
+
+
+
+
+
 
 ## Database Tables
 
