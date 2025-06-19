@@ -60,7 +60,7 @@ export const getRoundNumberForGame = (gameId) => {
         console.error('Errore durante il recupero del numero di round:', err);
         reject(err);
       } else {
-        resolve((row.maxRound || 0)+1); // Restituisce il numero massimo di round o 0 se non ci sono round
+        resolve((row.maxRound || 0)+1); // Restituisce il numero massimo di round o 1 se non ci sono round
       }
     });
   });

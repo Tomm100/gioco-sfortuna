@@ -1,4 +1,3 @@
-// src/components/game/GameBoard.jsx
 import React from 'react';
 import { Row, Col, Button } from 'react-bootstrap';
 import CardItem from './CardItem.jsx';

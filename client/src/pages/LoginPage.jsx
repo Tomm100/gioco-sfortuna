@@ -1,9 +1,6 @@
-// src/pages/LoginPage.jsx
 import React from 'react';
 import { Card, Container, Row, Col } from 'react-bootstrap';
 import { LoginForm } from '../components/AuthComponents.jsx'; 
-// Assicurati che il percorso punti al file dove hai definito LoginForm
-// e che LoginForm riceva in props una funzione `handleLogin` per effettuare il login.
 
 function LoginPage(props) {
   return (

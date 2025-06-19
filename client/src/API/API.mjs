@@ -1,7 +1,3 @@
-
-
-
-
 const SERVER_URL = "http://localhost:3001";
 
 
@@ -32,7 +28,7 @@ const getUserInfo = async () => {
   if (response.ok) {
     return user;
   } else {
-    throw user;  // an object with the error coming from the server
+    throw user;  
   }
 };
 
@@ -99,7 +95,7 @@ const guessCard = async (gameId, cardId, posizione) => {
   });
   if (response.ok) {
     const result = await response.json();
-    return result; // { result: 'correct' | 'wrong', card: { id, name, img, badluck }, numPlayerCards: number, gameStatus: 'ongoing' | 'won' | 'lost' }
+    return result; 
   } else {
     const errDetails = await response.text();
     throw errDetails;
@@ -108,18 +104,18 @@ const guessCard = async (gameId, cardId, posizione) => {
 
 }
 
-const guessCardTimeout = async (gameId, cardId) => {  // <-- Aggiungi cardId come parametro
-  const response = await fetch(SERVER_URL + `/api/user/game/${gameId}/timeout`, {  // <-- Cambia endpoint
+const guessCardTimeout = async (gameId, cardId) => {  
+  const response = await fetch(SERVER_URL + `/api/user/game/${gameId}/timeout`, {  
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    body: JSON.stringify({cardId}), // Ora cardId è definito
+    body: JSON.stringify({cardId}), 
   });
   if (response.ok) {
     const result = await response.json();
-    return result; // { result: 'wrong', gameStatus: 'ongoing' | 'lost', wrongGuesses: number }
+    return result; 
   } else {
     const errDetails = await response.text();
     throw errDetails;
@@ -132,7 +128,7 @@ const getUserGamesHistory = async () => {
   });
   if (response.ok) {
     const games = await response.json();
-    return games; // [{ gameId, status, createdAt, completedAt, totalCardsCollected, cards: [{ id, name, image, badluck }] }]
+    return games; 
   } else {
     const errDetails = await response.text();
     throw errDetails;
@@ -176,7 +172,7 @@ const guessDemoCard = async (gameId, cardId, posizione) => {
   });
   if (response.ok) {
     const result = await response.json();
-    return result; // { result: 'correct' | 'wrong', card: { id, name, img, badluck }, numPlayerCards: number, gameStatus: 'ongoing' | 'won' | 'lost' }
+    return result; 
   } else {
     const errDetails = await response.text();
     throw errDetails;
@@ -184,15 +180,15 @@ const guessDemoCard = async (gameId, cardId, posizione) => {
 }
 
 
-const guessCardDemoTimeout = async (gameId, cardId) => {  // <-- Aggiungi cardId come parametro
-  const response = await fetch(SERVER_URL + `/api/demo/game/${gameId}/timeout`, {  // <-- Cambia endpoint
+const guessCardDemoTimeout = async (gameId, cardId) => {  
+  const response = await fetch(SERVER_URL + `/api/demo/game/${gameId}/timeout`, { 
     method: 'POST',
    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({cardId}), // Ora cardId è definito
+    body: JSON.stringify({cardId}), 
   });
   if (response.ok) {
     const result = await response.json();
-    return result; // { result: 'wrong', gameStatus: 'ongoing' | 'lost', wrongGuesses: number }
+    return result; 
   } else {
     const errDetails = await response.text();
     throw errDetails;

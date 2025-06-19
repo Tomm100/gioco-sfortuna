@@ -12,6 +12,11 @@ import StoricoPage from './pages/StoricoPage.jsx';
 import RegolePage from './pages/RegolePage.jsx';
 import DemoGamePage from './pages/DemoGamePage.jsx';
 import DemoSummaryPage from './pages/DemoSummaryPage.jsx';
+import NotFoundPage from './pages/NotFoundPage.jsx';
+
+
+
+
 function App() {
   
   const [loggedIn, setLoggedIn] = useState(false);
@@ -66,7 +71,7 @@ function App() {
             <Route path = '/user/game/:gameId/summary' element={loggedIn ? <GameSummary></GameSummary> : <Navigate replace to='/login' />} />
 
             <Route path='/user/storico' element={loggedIn ? <StoricoPage></StoricoPage> : <Navigate replace to='/login' />} />
-            <Route path='*' element={<div>Page not found</div>}></Route>
+            <Route path='*' element={<NotFoundPage/>}></Route>
         </Route>
         
 

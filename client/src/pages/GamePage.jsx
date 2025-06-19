@@ -21,7 +21,7 @@ function GamePage() {
   const [resultData, setResultData] = useState(null);
   const [roundLoading, setRoundLoading] = useState(false);
   const [error, setError] = useState('');
-  const [roundStarted, setRoundStarted] = useState(false); // 👈 nuovo
+  const [roundStarted, setRoundStarted] = useState(false); 
 
   useEffect(() => {
     const loadInitial = async () => {

@@ -1,28 +1,19 @@
 import {useState} from "react";
 import { useNavigate } from "react-router";
 import { Container, Button, Stack, Row, Col, Card } from "react-bootstrap";
-import "bootstrap-icons/font/bootstrap-icons.css"; // icone Bootstrap
+import "bootstrap-icons/font/bootstrap-icons.css"; 
 import NewDemoGameModal from '../components/NewDemoGameModal.jsx';
 
-/**
- * StartGamePage – hero + sezione modalità di gioco
- * --------------------------------------------------------------
- * Ridotto lo spazio verticale tra la hero e le card:
- *  ▸ Rimosso `min-vh-100` e sostituito con un padding top/bottom più
- *    contenuto (py-5) mantenendo l'allineamento centrale.
- */
+
 function HomePage(props) {
   const navigate = useNavigate();
   const primaryColor = "#6c3cf0"; // viola brand
   const [showDemoModal, setShowDemoModal] = useState(false);
 
 
-  /* ---------------- Helper Card component -------------------- */
-  
-
   return (
     <div style={{ backgroundColor: "#f7f8fa" }}>
-      {/* HERO ----------------------------------------------------- */}
+      
       <section className="d-flex flex-column justify-content-center align-items-center pt-2">
         <Container className="text-center px-4">
           <h1
@@ -51,7 +42,7 @@ function HomePage(props) {
               Regole del gioco
             </Button>
        </Container>
-      {/* MODALITÀ DI GIOCO ------------------------------------------ */}
+      {/* MODALITÀ DI GIOCO */}
       <section className="pb-5">
         <Container>
           <Row className="g-4 justify-content-center">

@@ -24,7 +24,7 @@ function DemoGamePage() {
   const loadDemoGame = async () => {
     try {
       const gameStats = await API.getGameDemoStats(gameId);
-      console.log(gameStats);
+      
       const initial = gameStats.playerCards.map(
         (c) => new CardModel(c.id, c.name, c.image, c.badluck)
       ).sort((a, b) => a.badluck - b.badluck);
@@ -103,7 +103,7 @@ function DemoGamePage() {
         <ModalResultRound firstRoundIntro={true} onClose={startFirstRound} />
       )}
 
-      {/* Modal risultato */}
+      {/* Modal risultato round */}
       {showResult && (
         <Row className="justify-content-center mt-4">
           <Col md={8}>

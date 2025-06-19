@@ -4,7 +4,7 @@
 
 ## React Client Application Routes
 
-- Route `/`: Homepage pubblica dell’applicazione. Mostra una breve introduzione per utenti anonimi e un link al login. Accessibile solo da utenti non autenticati.
+- Route `/`: Homepage pubblica dell’applicazione. Mostra una breve introduzione per utenti non loggati, un link al login e un bottone per iniziare una partita demo. Accessibile solo da utenti non autenticati.
 
 - Route `/regole`: Pagina con le istruzioni dettagliate del gioco, accessibile da chiunque.
 
@@ -15,7 +15,7 @@
 - Route `/user/game/:gameId`: Pagina di gioco principale per utenti registrati. Mostra le carte in possesso e la nuova carta da collocare. 
   Il parametro `:gameId` identifica la partita in corso.
 
-- Route `/user/game/:gameId/summary`: pagina accessibile solo agli utenti autenticati. Mostra il riepilogo della partita appena completata, inclusi:
+- Route `/user/game/:gameId/summary`: Pagina accessibile solo agli utenti autenticati. Mostra il riepilogo della partita appena completata, includendo:
   - L’esito della partita (vinta o persa)
   - L’elenco completo delle carte raccolte (nome, immagine e indice di sfortuna)
   - Un pulsante per iniziare una nuova partita
@@ -24,7 +24,7 @@
   Il parametro `:gameId` identifica la partita in corso.
 
 
-- Route `/user/storico`: pagina accessibile solo agli utenti autenticati. Mostra la cronologia delle partite completate, ordinate per data decrescente. Per ogni partita sono riportati:
+- Route `/user/storico`: Pagina accessibile solo agli utenti autenticati. Mostra la cronologia delle partite completate, ordinate per data decrescente. Per ogni partita sono riportati:
   - L’esito finale (vinta o persa)
   - Il numero totale di carte raccolte 
   - La lista delle carte coinvolte, con:
@@ -33,7 +33,7 @@
     - Etichetta “Round N” per le carte presentate nei vari round
     - Stato “Vinta” se la carta è stata ottenuta, “Persa” se non è stata vinta
 
-- Route `/demo/game/:gameId`:Ppagina accessibile senza login. Permette di giocare una partita demo composta da un solo round. Il giocatore riceve 3 carte iniziali e deve collocare correttamente una situazione aggiuntiva. Il parametro `:gameId` identifica la partita demo in corso.
+- Route `/demo/game/:gameId`: Pagina accessibile senza effettuare il login. Permette di giocare una partita demo composta da un solo round. Il giocatore riceve 3 carte iniziali e deve collocare correttamente una situazione aggiuntiva. Il parametro `:gameId` identifica la partita demo in corso.
 
 - Route `/demo/game/:gameId/summary`: Riepilogo della partita demo. Mostra le carte iniziali e, se il round è stato vinto, anche la carta ottenuta. Disponibile solo dopo aver completato la demo. Il parametro `:gameId` identifica la partita demo in appena completata.
 
@@ -401,7 +401,7 @@
   - `password` – Password in formato hashato
   - `salt` – Valore salt per hashing sicuro
 
-- **`cards`** - Contieene tutte le carte disponibili nel gioco:
+- **`cards`** - Contiene tutte le carte disponibili nel gioco:
   - `id` – Chiave primaria
   - `name` – Descrizione della situazione sfortunata
   - `img` – Nome del file immagine associato
@@ -445,7 +445,7 @@
 
 - `NewDemoGameModal` (in `NewDemoGameModal.jsx`): Finestra per iniziare una partita demo per utenti non loggati.
 
-- `ModalResultRound` (in `ModalResultRound.jsx`): Mostra i risultati del round appena completato oppure il messaggi introduttivo se si tratta del primo round.
+- `ModalResultRound` (in `ModalResultRound.jsx`): Mostra i risultati del round appena completato oppure il messaggio introduttivo se si tratta del primo round.
 
 - `NavHeader` (in `NavHeader.jsx`): Barra di navigazione principale con funzionalità di login/logout e gestione delle route.
 

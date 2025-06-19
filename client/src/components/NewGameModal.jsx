@@ -41,4 +41,3 @@ function NewGameModal({ show, onHide }) {
 }
 
 export default NewGameModal;
-// 

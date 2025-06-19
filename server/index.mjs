@@ -161,7 +161,7 @@ app.post('/api/user/game/:gameId/guess'  , isLoggedIn, [
     if (!game || game.userId !== req.user.id) 
       return res.status(404).json({ error: 'Partita non trovata' });
    
-    // Recupera la carta del round
+    // Recupera la carta da indovinare del round
     const theCard = await getCardById(cardId);
     
     if (!theCard) 
@@ -337,7 +337,6 @@ app.post("/api/demo/game" , async (req, res) => {
 })
 
 // Richiede carta da indovinare
-
 app.get('/api/demo/game/:gameId/next', async (req, res) => {
   const gameId = +req.params.gameId;
   try {
@@ -351,7 +350,7 @@ app.get('/api/demo/game/:gameId/next', async (req, res) => {
     const nextCard = await getRandomCards(1, usedCards).then(cards => cards[0]);
 
     const roundNumber = await getRoundNumberForGame(gameId);
-    await addGameCard(gameId, nextCard.id, roundNumber); // salva anche il timestamp
+    await addGameCard(gameId, nextCard.id, roundNumber); 
 
     return res.json({
       id: nextCard.id,
