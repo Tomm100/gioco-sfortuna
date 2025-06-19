@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import path from 'path';
 import { getAllCards, getInitialCards, getRandomCards, getCardById } from './DAO/CardDAO.mjs';
 import { createGame, getGameById, updateGameStatus, createDemoGame } from './DAO/GamesDAO.mjs';
 import { addInitialCards, getUsedCardIdsForGame, addGameCard, getPlayerCardsForGame, updateGameCardGuessed, countPlayerCards, countWrongGuesses, getRoundNumberForGame, getUserGamesHistory, getRoundStartTime} from './DAO/RoundDAO.mjs';
@@ -71,33 +70,7 @@ app.use(session({
 }));
 app.use(passport.authenticate('session'));
 
-
-
-
-
 // ROUTES 
-
-app.get('/api/cards', (req, res) => {
-  getAllCards()
-    .then(cards => res.json(cards))
-    .catch(err => {
-      console.log('Errore durante il recupero delle carte:', err);
-    res.status(500).json({ message: 'Errore interno al server' });
-    });
-});
-
-
-app.get('/api/cards/initial', (req, res) => {
-  getInitialCards()
-    .then(cards => res.json(cards))
-    .catch(err => {
-      console.log('Errore durante il recupero delle carte iniziali:', err);
-      res.status(500).json({ message: 'Errore interno al server' });
-    });
-});
-
-
-
 
 /** 1) Creazione nuova partita **/
 // POST /api/game

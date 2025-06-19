@@ -261,16 +261,14 @@ const getGameCardsDetailsForHistory = async (gameId) => {
       ...initialCards.map(card => ({
         id: card.id,
         name: card.name,
-        // NON includo image e badluck per rispettare le specifiche
         roundNumber: null, // Le carte iniziali non hanno round
         isWon: true, // Le carte iniziali sono sempre conquistate
         isInitial: true
       })),
-      // Carte del gioco
+      // Carte dei round
       ...gameCards.map(card => ({
         id: card.id,
         name: card.name,
-        // NON includo image e badluck per rispettare le specifiche
         roundNumber: card.roundNumber,
         isWon: card.guessed === 1,
         isInitial: false
