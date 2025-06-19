@@ -37,7 +37,7 @@
 
 - Route `/demo/game/:gameId/summary`: Riepilogo della partita demo. Mostra le carte iniziali e, se il round è stato vinto, anche la carta ottenuta. Disponibile solo dopo aver completato la demo. Il parametro `:gameId` identifica la partita demo in appena completata.
 
-- Route `*`: Pagina per route non valide. Mostra un semplice messaggio di errore "Page not found".
+- Route `*`: Pagina per route non valide. Mostra un semplice messaggio di errore "404 Pagina non trovata" e un bottone per tornare alla home.
   
 
 ## API Server
@@ -108,7 +108,7 @@
 ```
 
 #### **Ottieni prossima carta da indovinare**
-- **URL**: `/api/user/game/<gameId>/next`
+- **URL**: `/api/user/game/:gameId/next`
 - **Metodo HTTP**: GET
 - **Descrizione**: Ottieni la prossima carta da indovinare per la partita specificata.
 - **Risposta**: `200 OK` (successo), `404 Not Found` (partita non trovata), `400 Bad Request` (partita già conclusa), o `401 Unauthorized` (non autenticato).
@@ -122,7 +122,7 @@
 ```
 
 #### **Invia posizione da indovinare**
-- **URL**: `/api/user/game/<gameId>/guess`
+- **URL**: `/api/user/game/:gameId/guess`
 - **Metodo HTTP**: POST
 - **Descrizione**: Invia una proposta di posizione per una carta nella partita specificata
 - **Corpo della richiesta**:
@@ -157,7 +157,7 @@
 ```
 
 #### **Gestisci timeout**
-- **URL**: `/api/user/game/<gameId>/timeout`
+- **URL**: `/api/user/game/:gameId/timeout`
 - **Metodo HTTP**: POST
 - **Descrizione**: Gestisce il timeout per una carta, quando il giocatore non effettua una scelta entro 30 secondi.
 - **Corpo della richiesta**:
@@ -176,7 +176,7 @@
 }
 ```
 #### **Ottieni lo stato di una partita**
-- **URL**: `/api/user/game/<gameId>`
+- **URL**: `/api/user/game/:gameId`
 - **Metodo HTTP**: GET
 - **Descrizione**: Recupera lo stato attuale di una partita specifica.
 - **Risposta**: `200 OK` (successo), `404 Not Found` (partita non trovata), o `401 Unauthorized` (non autenticato).
@@ -287,7 +287,7 @@
 ```
 
 #### **Ottieni prossima carta demo**
-- **URL**: `/api/demo/game/<gameId>/next`
+- **URL**: `/api/demo/game/:gameId/next`
 - **Metodo HTTP**: GET
 - **Descrizione**: Ottiene la prossima carta da indovinare nella partita demo. Il server seleziona automaticamente una carta casuale non utilizzata.
 - **Risposta**: `200 OK` (successo), `404 Not Found` (partita non trovata), o `400 Bad Request` (partita già conclusa).
@@ -300,7 +300,7 @@
 }
 ```
 #### **Invia tentativo demo**
-- **URL**: `/api/demo/game/<gameId>/guess`
+- **URL**: `/api/demo/game/:gameId/guess`
 - **Metodo HTTP**: POST
 - **Descrizione**: Invia un tentativo di posizionamento per una carta nella partita demo.
 - **Corpo della richiesta**:
@@ -333,7 +333,7 @@
 ```
 
 #### **Gestisci timeout demo**
-- **URL**: `/api/demo/game/<gameId>/timeout`
+- **URL**: `/api/demo/game/:gameId/timeout`
 - **Metodo HTTP**: POST
 - **Descrizione**: Gestisce il timeout per un tentativo di carta nella partita demo.
 - **Corpo della richiesta**:
@@ -352,7 +352,7 @@
 ```
 
 #### **Ottieni stato partita demo**
-- **URL**: `/api/demo/game/<gameId>`
+- **URL**: `/api/demo/game/:gameId`
 - **Metodo HTTP**: GET
 - **Descrizione**: Recupera lo stato attuale di una partita demo.
 - **Risposta**: `200 OK` (successo) o `404 Not Found` (partita non trovata).
@@ -382,12 +382,6 @@
   "gameStatus": "ongoing"
 }
 ```
-
-
-
-
-
-
 
 
 
@@ -450,7 +444,6 @@
 - `NavHeader` (in `NavHeader.jsx`): Barra di navigazione principale con funzionalità di login/logout e gestione delle route.
 
 - `DefaultLayout` (in `DefaultLayout.jsx`): Layout di base che fornisce una struttura coerente tra le varie pagine.
-
 
 ## Screenshot
 

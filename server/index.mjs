@@ -471,7 +471,7 @@ app.get('/api/demo/game/:gameId', async (req, res) => {
       return res.status(404).json({ error: 'Partita non trovata' });
     }
     
-    // Recupero solo le carte conquistate + le iniziali (nome initialCards da cambiare)
+    
     const playerCard = await getPlayerCardsForGame(gameId);
     
     
