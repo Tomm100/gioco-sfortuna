@@ -5,7 +5,7 @@
 ![Passport.js](https://img.shields.io/badge/Auth-Passport.js-green)
 
 # Gioco della Sfortuna
-Progetto individuale sviluppato per il corso Web Applications I (A.A. 2024/2025) al **Politecnico di Torino**.
+Progetto individuale sviluppato per il corso **Web Applications I** (A.A. 2024/2025) al **Politecnico di Torino**.
 L'applicazione è ispirata al gioco "Stuff Happens", in cui il giocatore deve collocare eventi sfortunati in ordine crescente di gravità.
 
 ## Funzionalità principali
