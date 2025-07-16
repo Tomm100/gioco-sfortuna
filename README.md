@@ -1,6 +1,75 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/uNTgnFHD)
-# Exam #1: "Gioco della Sfortuna"
-## Student: s338411 CENTONZE TOMMASO 
+![Node.js](https://img.shields.io/badge/Node.js-22.x-green)
+![React](https://img.shields.io/badge/React-18-blue)
+![SQLite](https://img.shields.io/badge/SQLite-3-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Passport.js](https://img.shields.io/badge/Auth-Passport.js-green)
+
+# Gioco della Sfortuna
+Progetto individuale sviluppato per il corso Web Applications I (A.A. 2024/2025) al **Politecnico di Torino**.
+L'applicazione è ispirata al gioco "Stuff Happens", in cui il giocatore deve collocare eventi sfortunati in ordine crescente di gravità.
+
+## Funzionalità principali
+
+L’applicazione web implementa una versione single-player del gioco "Stuff Happens", con le seguenti funzionalità:
+
+- **Gioco completo per utenti registrati**: Partite composte da più round. La partita è vinta se si collezionano 6 carte, mentre è persa se si sbagliano 3 carte.
+- **Modalità demo per visitatori**: Una partita da un solo round accessibile senza login.
+- **Cronologia partite**: Accessibile solo agli utenti registrati, con riepilogo di ogni carta, esito e round associato.
+- **Visualizzazione carte**: Ogni carta mostra nome, immagine e indice di sfortuna (solo se conquistata).
+- **Riepilogo finale**: Al termine di ogni partita, l’utente visualizza tutte le carte ottenute.
+- **Timer round**: Ogni round ha un limite di tempo di 30 secondi per collocare correttamente la carta.
+- **Login/logout**: Autenticazione tramite sessione con credenziali hashate (via Passport.js).
+
+
+## Tecnologie utilizzate
+
+- **Frontend**: React + Vite, React Router DOM, CSS Modules
+- **Backend**: Node.js (ES Modules) + Express
+- **Database**: SQLite
+- **Autenticazione**: Passport.js + cookie-session, password hash + salt
+
+## Avvio dell'applicazione
+
+> ⚠️ Requisiti:
+> - Node.js 22.x LTS
+> - nodemon installato globalmente (`npm install -g nodemon`)
+
+### 1. Clona il progetto
+
+```bash
+git clone https://github.com/Tomm100/gioco-sfortuna.git
+cd gioco-sfortuna
+```
+
+### 2. Installa le dipendenze
+```bash
+cd server
+npm install
+cd ../client
+npm install
+```
+### 3. Avvia il server e il client (due terminal separati)
+```bash
+cd server
+nodemon index.mjs
+```
+
+```bash
+cd client
+npm run dev
+```
+L'app sarà visibile su: http://localhost:5173
+
+## Users Credentials
+
+User 1:
+  - username: tommaso@example.com
+  - password: password  
+
+User 2:  
+  - username: bob@example.com
+  - password: password 
+> ⚠️ Le credenziali inserite sono solo a scopo di testing e non rappresentano utenti reali.
 
 ## React Client Application Routes
 
@@ -40,7 +109,7 @@
 - Route `*`: Pagina per route non valide. Mostra un semplice messaggio di errore "404 Pagina non trovata" e un bottone per tornare alla home.
   
 
-## API Server
+## API REST
 
 ### **API di Autenticazione**
 
@@ -456,12 +525,6 @@
 ![Screenshot](./img/cronologia.png)
 
 
-## Users Credentials
+## Licenza
 
-User 1:
-  - username: tommaso@example.com
-  - password: password  
-
-User 2:  
-  - username: bob@example.com
-  - password: password 
+Questo progetto è rilasciato sotto licenza MIT. Vedi il file [LICENSE](./LICENSE) per i dettagli.
